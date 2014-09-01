@@ -1,0 +1,36 @@
+class "";
+import                          Classes Библио;
+inclass
+  func Create:HouseCache;
+    var selfref:HouseCache;
+    selfref = inherited Create;
+    selfref.cache = Storage.Create;
+    selfref.ФИАС = GetFIASObj;
+    Result = selfref;
+  end;
+
+inobject
+  var cache:Storage;
+  var ФИАС:ФИАС_XML_RPC;
+
+  func gethouses(aoguid:String):String[2];
+    var i:Integer;
+    var ii:Integer;
+    var tmp:Variant;
+    var tmpa:Storage[];
+    var pairs:String[2];
+    if not cache.FieldExist(aoguid) then
+        --проверить на переполнение!
+        tmpa = ФИАС.GetBuildings(aoguid);
+        ii = LengthOfArray(tmpa);
+        for i = 1..ii do
+            --one =  as Storage;
+            pairs[1, i] = tmpa[i].name;
+            pairs[2, i] = tmpa[i].guid;
+        end;
+
+      cache.SetField(aoguid, pairs);
+    end;
+    return cache.getField(aoguid) as String[2];
+  end;
+end

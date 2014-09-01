@@ -1,0 +1,76 @@
+class inherited XMLRPC.XMLRPC_Proxy "";
+import XMLRPC classes XMLMapper, MapperNode, AsyncResult;
+inclass
+  func BuildingsMapper:XMLMapper;
+    var res: XMLMapper;
+
+    res = XMLMapper.Create;
+    res.fields[1] = MapperNode.Create;
+    res.fields[1].nodename = 'sub';
+    res.fields[1].fieldname = 'sub';
+    res.fields[1].nodekind = 1;
+    res.fields[1].repeatable = True;
+    res.fields[1].nodetype = XMLMapper.Create;
+    res.fields[1].nodetype.allowreflection = True;
+
+    return res;
+  end;
+
+  WaitingAsync: XMLRPC.AsyncResult;
+
+inobject
+  var rest_URL:String;
+
+  func GetBuildingProperties(AO_GUID:String;Proplist:Variant):Storage;
+    Result = _Execute_single("GetBuildingProperties", [AO_GUID, Proplist]) as Storage;
+  end;
+
+
+  proc PollBuildings(AO_GUID:String);
+    var BldMapper:XMLMapper;
+    var tgt_url:String;
+    tgt_url = rest_URL + 'list/' + AO_GUID + '/all_b';
+    if WaitingAsync <> nil then --—брос "чужого" запроса
+       if WaitingAsync.id <> tgt_url then
+          WaitingAsync.abort;
+          WaitingAsync = nil;
+       end;
+    end;
+    if WaitingAsync = nil then --если запрос есть, значит от "наш"
+      BldMapper =  BuildingsMapper;
+      WaitingAsync = XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
+    fi;
+  end;
+
+  func GetBuildings(AO_GUID:String):Storage[];
+    PollBuildings(AO_GUID);
+    Result = WaitingAsync.Get.sub as Storage[];
+  end;
+
+--  func GetBuildings(AO_GUID:String):Storage[];
+--    Result = _Execute_single("GetBuildings", [AO_GUID]) as Storage[];
+--  end;
+
+  func GetAreaProperty(AO_GUID:String; Propname:String):Variant;
+    Result = _Execute_single("GetAreaProperty", [AO_GUID, Propname]);
+  end;
+
+  func GetAreas(filter_by:Storage; Name_like:String=''):Variant;
+    Result = _Execute_single("GetAreas", [filter_by, Name_like]);
+  end;
+
+  func GetAreasAsync(filter_by:Storage; Name_like:String=''):AsyncResult;
+
+    return XMLRPC.AsyncResult.XMLRPCAsync(self.URL, "GetAreas", 
+                                          [filter_by, Name_like], false);
+  end;
+
+  func GetSubsAsync(aoguid:String):AsyncResult;
+    var BldMapper:XMLMapper;
+    var tgt_url:String;
+    tgt_url = rest_URL + 'list/' + aoguid + '/all';
+    BldMapper =  BuildingsMapper;
+    return XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
+  end;
+
+end

@@ -1,0 +1,7 @@
+class "Profile";
+
+inclass
+  proc Init;
+
+  end;
+end

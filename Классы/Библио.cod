@@ -1,0 +1,162 @@
+class "Библиотечные константы и функции";
+inclass
+--Псевдодвумерый массив сопоставления уровней деления.
+var УровниФИАС[] :Integer =     [1,
+                                2,
+                                3,
+                                4,
+                                5,
+                                6,
+                                7,
+                                90,
+                                91];
+
+var ПрефПолей[] :String =       ['Регион',
+                                'Округ',
+                                'Район',
+                                'Город',
+                                'Терр',
+                                'НасПункт',
+                                'Улица',
+                                'ДопТерр',
+                                'ДопАЭ'];
+
+var УровниКЛАДР[] :Integer =   [1,
+                                -1,
+                                2,
+                                3,
+                                -1,
+                                4,
+                                5,
+                                -1,
+                                -1];
+
+var ПоляФИАС[] :String =       ['regioncode',
+                                'autocode',
+                                'areacode',
+                                'citycode',
+                                'ctarcode',
+                                'placecode',
+                                'streetcode',
+                                'extrcode',
+                                'sextcode'];
+
+var РазмерКода[] :Integer =     [2,
+                                1,
+                                3,
+                                3,
+                                3,
+                                3,
+                                4,
+                                5,
+                                3];
+
+-- @doc Проверяет и исправляет либо создаёт новую запись сокращения для адресного элемента
+-- @doc Уровни измеряются в соответствии со справочником сокращений (УровниКЛАДР)
+func ЭлементСтат(Сокр:String; Полн:String; Уровень:Integer):Базовый.Классификаторы.Сокращение;
+var Q: Query;
+var res: Базовый.Классификаторы.Сокращение;
+  Q = Query.Create([Базовый.Классификаторы.Сокращение]);
+  Q.Filter = "(Уровень = " + Str(Уровень) + ") AND ( Код ='" + Сокр + "')" ;
+  Q.Select;
+  if Q.Count = 0 then
+     res = Базовый.Классификаторы.Сокращение.Create;
+     res.Уровень = Уровень;
+     res.Код = Substr(Сокр, 1, 10);
+     res.Имя = Полн;
+     res.Post;
+  else
+     Q.First;
+     res = Q.Current;
+     if res.Имя <> Полн then
+        res.Имя = Полн;
+     end;
+  end;
+  Result = res;
+end;
+
+func FilterObjArray(Input:Object[]; Condition:String):Object[];
+  var res:Object[];
+  var i, ii: Integer;
+  res = [];
+  ii = LengthOfArray(Input);
+  for i = 1.. ii do
+    if Input[i].Evaluate(Condition) then
+       СИС2.Функции.AddInArray(res, Input[i]);
+    end;
+
+  end;
+  return res;
+end;
+
+func GetFIASObj:DynamicObject;
+  var Q: Query;
+  var r: МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса;
+  var FIOSM_URL: String;
+  var res: DynamicObject;
+
+  Q = Query.Create([МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса]);
+  Q.Select;
+  if Q.Bof and Q.Eof then  --ТББ_Базовый.Запрос_Пустой
+    FIOSM_URL = "";
+  else
+    r = Q.Current as МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса;
+    FIOSM_URL = r.FIOSM_URL;
+  end;
+  Q.Close;
+  if FIOSM_URL = "":
+    FIOSM_URL = "http://fiosm.openstreetmap.ru";
+  end;
+
+  res = ФИАС_XML_RPC.CreateEx(FIOSM_URL + "/xmlrpc");
+  res.rest_URL = FIOSM_URL + "/rest/";
+  Result = res;
+end;
+
+func EstStatMapper:XMLRPC.XMLMapper;
+    var res: XMLRPC.XMLMapper;
+    var res_: XMLRPC.XMLMapper;
+
+    res = XMLRPC.XMLMapper.Create;
+    res.fields[1] = XMLRPC.MapperNode.Create;
+    res.fields[1].nodename = 'EstateStatus';
+    res.fields[1].fieldname = 'EstateStatus';
+    res.fields[1].nodekind = 1; --узел
+    res.fields[1].repeatable = True;
+
+    res_  = XMLRPC.XMLMapper.Create;
+    res_.fields[1] = XMLRPC.MapperNode.Create;
+    res_.fields[1].nodename = 'ESTSTATID';
+    res_.fields[1].fieldname = 'ESTSTATID';
+    res_.fields[1].nodekind = 2; --атрибут
+    res_.fields[1].repeatable = False;
+    res_.fields[1].nodetype = 2; --varInt
+    res.fields[1].nodetype  = res_;
+    --ВАУ!!!
+--    res_.fields[1].nodetype = 2; --varInt
+--    res.fields[1].nodetype.fields[1].nodetype = 2; --varI
+
+    res_.fields[2] = XMLRPC.MapperNode.Create;
+    res_.fields[2].nodename = 'NAME';
+    res_.fields[2].fieldname = 'NAME';
+    res_.fields[2].nodekind = 2; --атрибут
+    res_.fields[2].repeatable = False;
+    res_.fields[2].nodetype = 1; --varString
+    res_.allowreflection = False;
+
+    return res;
+end;
+
+
+func AGfromAreas(Areas:Variant):String;
+  var tmpa: Storage[];
+  var tmp: Storage;
+  tmpa = Areas as Storage[];
+  if LengthOfArray(tmpa) = 0 then
+     return nil;
+  end;
+  tmp = tmpa[1];
+  return tmp.aoguid;
+end;
+
+end

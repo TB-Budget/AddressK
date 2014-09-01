@@ -1,0 +1,81 @@
+extends Базовый.Справочники.интАдрес "";
+import classes Библио;
+
+inclass Public
+
+inclass Private
+  func СформироватьАдрес(aRecord: Базовый.Справочники.Адрес;
+                         аФорматАдреса: Адрес_ФорматВывода;--!!!
+                         аВыводСтраны: Адрес_ВыводСтраны;
+                         аВыводИндекса: Адрес_ВыводИндекса;
+                         аИмяСтраны: Logical;--=True;
+                         аИмяРегиона: Logical;--=True;
+                         аИмяДляМосквы: Logical;--=False;--!!!?
+                         аРазделитель: String=', ';
+                         аИгнорПустых: Logical=True--!!!?
+                         ):String;
+    var ar_res: String[];
+    var res: String;
+    var i, ii:Integer;
+    --Пустой адрес - пустой результат
+    if aRecord = nil then
+       return '';
+    end;
+    --Конструктор работает только для России
+    if aRecord.Страна <> nil and aRecord.Страна.ЭтоСтрана and aRecord.Страна.Код <> '643' then
+       return aRecord.Адрес_Строкой;
+    end;
+
+    if аИмяРегиона then
+       ar_res = [aRecord.GetField("Регион_Стр")] as String[];
+    else
+       ar_res = [aRecord.GetField("Регион_Код")] as String[];
+    end;
+
+    ii = LengthOfArray(ПрефПолей);
+    for i = 2 .. ii do
+       СИС2.Функции.AddInArray(ar_res,  aRecord.GetField(ПрефПолей[i]));
+    end;
+
+    if аФорматАдреса = афвПФР then
+       if aRecord.Дом <> nil then
+          СИС2.Функции.AddInArray(ar_res,  'Д.' + aRecord.Дом);
+       end;
+       if aRecord.корпус <> nil then
+          СИС2.Функции.AddInArray(ar_res,  'КОРП.' + aRecord.Дом);
+       end;
+       if aRecord.квартира <> nil then
+          СИС2.Функции.AddInArray(ar_res,  'КВ.' + aRecord.Дом);
+       end;
+    else
+       СИС2.Функции.AddInArray(ar_res,  aRecord.Дом_СТР);
+       СИС2.Функции.AddInArray(ar_res,  aRecord.Квартира);
+    end;
+
+    res = СИС2.СтроковыеФункции.СложитьСтрокиРазделенныеСимволом(ar_res,
+                                                                 аРазделитель,
+                                                                 False,
+                                                                 аИгнорПустых);
+    --Добавляем страну если требуется
+    -- TODO: Добавить вывод не России когда будет поддержка в остальном конструкторе
+    if (аВыводСтраны = авс_СоСтраной or
+       (аВыводСтраны = авс_БезСтраныРФ and False)) and -- TODO: Проверить опцию вывода России для незаполненной страны
+       aRecord.Страна <> nil then
+       if аИмяСтраны then
+          if aRecord.Страна.Имя <> nil then
+             res = aRecord.Страна.Имя + аРазделитель + res;
+          end;
+       else
+          if aRecord.Страна.Код <> nil then
+             res = aRecord.Страна.Код + аРазделитель + res;
+          end;
+       end;
+    end;
+    if аВыводИндекса = ави_СИндексом and aRecord.Индекс <> nil then
+       res = aRecord.Индекс + аРазделитель + res;
+    end;
+    return res;
+  end;
+inobject
+
+end

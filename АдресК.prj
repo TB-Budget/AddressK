@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Project Version="1">
+  <Options Caption="АдресК" Comment="Расширение функционала работы с адресами" Version="1.00" Author="Copyright © 2014 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
+  <Usage>
+    <Project Name="Базовый"/>
+    <Project Name="XMLRPC"/>
+  </Usage>
+  <Groups>
+    <Group Name="Справочники" Type="Documents" Disabled="False"/>
+    <Group Name="Бланки" Type="Blanks" Disabled="False"/>
+    <Group Name="Классы" Type="Classes" Disabled="False"/>
+    <Group Name="Shared" Type="Other" Disabled="False"/>
+  </Groups>
+</Project>
