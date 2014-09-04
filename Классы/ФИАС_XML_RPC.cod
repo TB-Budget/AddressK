@@ -12,6 +12,12 @@ inclass
     res.fields[1].repeatable = True;
     res.fields[1].nodetype = XMLMapper.Create;
     res.fields[1].nodetype.allowreflection = True;
+    res.fields[2] = MapperNode.Create;
+    res.fields[2].nodename = 'too_much';
+    res.fields[2].fieldname = 'too_much';
+    res.fields[2].nodekind = 1;
+    res.fields[2].nodetype = 4; --varLogical : Integer = 4;  -- Логическое (булево) значение
+    res.fields[2].repeatable = False;
 
     return res;
   end;

@@ -333,7 +333,6 @@ inobject
     if tmpGuid = '' then
        tmpGuid = 'None';
     end;
-    --!!!
     --Если есть закэшированный список - выведем его
     if tmpGuid <> nil and sub_cache.FieldExists(tmpGuid):
        if sub_cache.GetField(tmpGuid) is XMLRPC.AsyncResult then
@@ -345,12 +344,20 @@ inobject
        else  --уже распарсен
          tmp = sub_cache.GetField(tmpGuid);
        end;
+       --Доппроверка too_much
+       if tmp is Storage and tmp.FieldExist('too_much') then
+          if tmp.too_much then
+             tmp = 'Слишком много элементов, уточните запрос';
+          end;
+       end;
+       --Вытаскивание массива
        if tmp is Storage and tmp.FieldExist('sub') then
           tmp = tmp.sub;
-        --!!!Доппроверка too_much
        end;
        if varType(tmp) = 8 then  --Тут еще может быть строка с ошибкой
           tmp = XMLRPC.Библио.Filter('aolevel = "'+Str(УровниФИАС[l])+'"', tmp as Object[]);
+       elsif varType(tmp) <> 1:  --А если тут не строка, то похоже пришел какой-то мусор
+          tmp = nil;
        end;
     end;
 
@@ -394,6 +401,9 @@ inobject
        FIAS_check(l-1);
        UpdGlobal(nil);
        return True;  --Ручной ввод
+    end;
+    if Record.GetField(Cell.Contents) = Value then
+       return True;  --Ничего не изменилось
     end;
     filter_by = СборУсл(l);
     filter_by.aolevel = УровниФИАС[l];
