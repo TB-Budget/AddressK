@@ -1,4 +1,5 @@
 Extends МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса title "Глобальные параметры структуры бизнеса";
-  field FIOSM_URL:String;
+  field NotUsedFIOSM: logical;
+  field FIOSM_URL: String;
 
 end;

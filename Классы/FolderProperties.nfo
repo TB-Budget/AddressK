@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Properties Version="1"/>
+<Items>
+  <Item Name="HouseCache"/>
+  <Item Name="Константы"/>
+  <Item Name="Profile"/>
+  <Item Name="Библио"/>
+  <Item Name="интАдрес"/>
+  <Item Name="ФИАС_XML_RPC"/>
+</Items>

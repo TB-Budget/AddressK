@@ -1,0 +1,17 @@
+﻿class "";
+
+inclass
+--{СЛУЖЕБНЫЕ
+  ИмяВерсииПроекта: String = 'АдресК.ВерсияПроекта';
+
+  func ПолучитьВерсиюПроекта: Numeric;
+    Result = СИС2.Функции.СформироватьВерсиюПроекта(ClassProject);
+  end;
+--}
+
+  FiosmUrl_ByDefault: string = "http://fiosm.openstreetmap.ru";
+
+
+
+
+end
