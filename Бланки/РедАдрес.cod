@@ -1,41 +1,41 @@
-class inherited МашинаРеквизитов.Базовые.редБазовыйДокумент "Адрес субъекта", editor Базовый.Справочники.Адрес;
-import classes Библио;
+п»їclass inherited РњР°С€РёРЅР°Р РµРєРІРёР·РёС‚РѕРІ.Р‘Р°Р·РѕРІС‹Рµ.СЂРµРґР‘Р°Р·РѕРІС‹Р№Р”РѕРєСѓРјРµРЅС‚ "РђРґСЂРµСЃ СЃСѓР±СЉРµРєС‚Р°", editor Р‘Р°Р·РѕРІС‹Р№.РЎРїСЂР°РІРѕС‡РЅРёРєРё.РђРґСЂРµСЃ;
+import classes Р‘РёР±Р»РёРѕ;
 import classes HouseCache;
 --import XMLRPC Classes Client;
 inclass
 
 inobject
 
---{Объекты шаблона
-  var фреймТипАдреса: TemplateFrame;
-  var фреймСтрокой: TemplateFrame;
-  var фреймГлавное: TemplateFrame;
-  var фреймТипАдреса2: TemplateFrame;--новый фрейм
-  var секПозицииТиповАдресов: TemplateSection;--новая секция
-  var секцДомНовое: TemplateSection;
-  var секцДомСтарое: TemplateSection;
+--{РћР±СЉРµРєС‚С‹ С€Р°Р±Р»РѕРЅР°
+  var С„СЂРµР№РјРўРёРїРђРґСЂРµСЃР°: TemplateFrame;
+  var С„СЂРµР№РјРЎС‚СЂРѕРєРѕР№: TemplateFrame;
+  var С„СЂРµР№РјР“Р»Р°РІРЅРѕРµ: TemplateFrame;
+  var С„СЂРµР№РјРўРёРїРђРґСЂРµСЃР°2: TemplateFrame;--РЅРѕРІС‹Р№ С„СЂРµР№Рј
+  var СЃРµРєРџРѕР·РёС†РёРёРўРёРїРѕРІРђРґСЂРµСЃРѕРІ: TemplateSection;--РЅРѕРІР°СЏ СЃРµРєС†РёСЏ
+  var СЃРµРєС†Р”РѕРјРќРѕРІРѕРµ: TemplateSection;
+  var СЃРµРєС†Р”РѕРјРЎС‚Р°СЂРѕРµ: TemplateSection;
 --}
 
---{Поля шаблона
-  var ТипАдресаНаим: Базовый.Справочники.ТипАдреса[];
-  var ТипАдресаПрименен: logical[];
-  var UseFiosm: logical; --глобальный управляющий флаг
+--{РџРѕР»СЏ С€Р°Р±Р»РѕРЅР°
+  var РўРёРїРђРґСЂРµСЃР°РќР°РёРј: Р‘Р°Р·РѕРІС‹Р№.РЎРїСЂР°РІРѕС‡РЅРёРєРё.РўРёРїРђРґСЂРµСЃР°[];
+  var РўРёРїРђРґСЂРµСЃР°РџСЂРёРјРµРЅРµРЅ: logical[];
+  var UseFiosm: logical; --РіР»РѕР±Р°Р»СЊРЅС‹Р№ СѓРїСЂР°РІР»СЏСЋС‰РёР№ С„Р»Р°Рі
 
-  var ФИАС: DynamicObject;  --Объект доступа к ФИАС. Зависит от выбранного "бэкенда".
-  var ao_guid: Variant[];  --Идентификаторы адресных элементов строка-гуид или отложенный результат.
-  var sub_cache: Storage;  --Кэш подчиненных адресных элементов
-             -- поле - гуид строкой; значение - массив хранилищ или AsyncResult
+  var Р¤РРђРЎ: DynamicObject;  --РћР±СЉРµРєС‚ РґРѕСЃС‚СѓРїР° Рє Р¤РРђРЎ. Р—Р°РІРёСЃРёС‚ РѕС‚ РІС‹Р±СЂР°РЅРЅРѕРіРѕ "Р±СЌРєРµРЅРґР°".
+  var ao_guid: Variant[];  --РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂС‹ Р°РґСЂРµСЃРЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ СЃС‚СЂРѕРєР°-РіСѓРёРґ РёР»Рё РѕС‚Р»РѕР¶РµРЅРЅС‹Р№ СЂРµР·СѓР»СЊС‚Р°С‚.
+  var sub_cache: Storage;  --РљСЌС€ РїРѕРґС‡РёРЅРµРЅРЅС‹С… Р°РґСЂРµСЃРЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ
+             -- РїРѕР»Рµ - РіСѓРёРґ СЃС‚СЂРѕРєРѕР№; Р·РЅР°С‡РµРЅРёРµ - РјР°СЃСЃРёРІ С…СЂР°РЅРёР»РёС‰ РёР»Рё AsyncResult
   var last_ao_guid: String;
   var hCache: HouseCache;
-  var СтатДомов: Storage[];  --загружаемая при запуске база статусов домов
-                             --очень маленькая, поэтому не храним в БД
+  var РЎС‚Р°С‚Р”РѕРјРѕРІ: Storage[];  --Р·Р°РіСЂСѓР¶Р°РµРјР°СЏ РїСЂРё Р·Р°РїСѓСЃРєРµ Р±Р°Р·Р° СЃС‚Р°С‚СѓСЃРѕРІ РґРѕРјРѕРІ
+                             --РѕС‡РµРЅСЊ РјР°Р»РµРЅСЊРєР°СЏ, РїРѕСЌС‚РѕРјСѓ РЅРµ С…СЂР°РЅРёРј РІ Р‘Р”
   var LAGPrefetch: XMLRPC.AsyncResult;
 --}
 
---{Вспомогательные процедуры и функции
+--{Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ РїСЂРѕС†РµРґСѓСЂС‹ Рё С„СѓРЅРєС†РёРё
   proc Cache_subs(aoguid:String);
     if aoguid <> nil and not sub_cache.FieldExist(aoguid) then
-      sub_cache.SetField(aoguid, ФИАС.GetSubsAsync(aoguid));
+      sub_cache.SetField(aoguid, Р¤РРђРЎ.GetSubsAsync(aoguid));
     end;
   end;
 
@@ -43,10 +43,10 @@ inobject
     var n, i, ii: Integer;
     var tmp: Variant;
     var filter_by:Storage;
-    ii = LengthofArray(ПрефПолей);
-    --вычисление нижнего заполненного уровня
+    ii = LengthofArray(РџСЂРµС„РџРѕР»РµР№);
+    --РІС‹С‡РёСЃР»РµРЅРёРµ РЅРёР¶РЅРµРіРѕ Р·Р°РїРѕР»РЅРµРЅРЅРѕРіРѕ СѓСЂРѕРІРЅСЏ
     for i = ii .. 1 step -1 do
-        tmp = Record.GetField(ПрефПолей[i] + '_Код');
+        tmp = Record.GetField(РџСЂРµС„РџРѕР»РµР№[i] + '_РљРѕРґ');
         if tmp = '' then
            tmp = 0;
         end;
@@ -55,8 +55,8 @@ inobject
            Break;
         end;
     end;
-    filter_by = СборУсл(n + 1); --А вот это не шибко правильно!
-    return ФИАС.GetAreasAsync(filter_by,);
+    filter_by = РЎР±РѕСЂРЈСЃР»(n + 1); --Рђ РІРѕС‚ СЌС‚Рѕ РЅРµ С€РёР±РєРѕ РїСЂР°РІРёР»СЊРЅРѕ!
+    return Р¤РРђРЎ.GetAreasAsync(filter_by,);
   end;
 
   Func LastAoGuid:String;
@@ -82,7 +82,7 @@ inobject
       LAGPrefetch = nil;
     end;
     if aoguid <> '' then
-       ФИАС.PollBuildings(aoguid);
+       Р¤РРђРЎ.PollBuildings(aoguid);
     end;
     last_ao_guid = aoguid;
   end;
@@ -92,58 +92,58 @@ inobject
      var l:Integer;
      var filter_by:Storage;
      var AO_:variant[];
-     --AO.aolevel = Int(AO.aolevel); --!Фикс для строковой загрузки из REST
-     --проверяем - если получено из REST-списка, надо получить объект заново.
+     --AO.aolevel = Int(AO.aolevel); --!Р¤РёРєСЃ РґР»СЏ СЃС‚СЂРѕРєРѕРІРѕР№ Р·Р°РіСЂСѓР·РєРё РёР· REST
+     --РїСЂРѕРІРµСЂСЏРµРј - РµСЃР»Рё РїРѕР»СѓС‡РµРЅРѕ РёР· REST-СЃРїРёСЃРєР°, РЅР°РґРѕ РїРѕР»СѓС‡РёС‚СЊ РѕР±СЉРµРєС‚ Р·Р°РЅРѕРІРѕ.
      if AO.FieldExist('guid') and not AO.FieldExist('aoguid') then
         --AO.aoguid = AO.guid;
         filter_by = Storage.Create;
         filter_by.aoguid = AO.guid;
-        AO_ = ФИАС.GetAreas(filter_by,) as variant[];
+        AO_ = Р¤РРђРЎ.GetAreas(filter_by,) as variant[];
         AO = AO_[1];
      end;
-     --Подгрузка потенциально пропущенных полей
+     --РџРѕРґРіСЂСѓР·РєР° РїРѕС‚РµРЅС†РёР°Р»СЊРЅРѕ РїСЂРѕРїСѓС‰РµРЅРЅС‹С… РїРѕР»РµР№
 --     if not AO.FieldExist('formalname') then
---        AO.formalname = ФИАС.GetAreaProperty(AO.aoguid, 'formalname');
+--        AO.formalname = Р¤РРђРЎ.GetAreaProperty(AO.aoguid, 'formalname');
 --     end;
 --     if not AO.FieldExist('shortname') then
---        AO.shortname = ФИАС.GetAreaProperty(AO.aoguid, 'shortname');
+--        AO.shortname = Р¤РРђРЎ.GetAreaProperty(AO.aoguid, 'shortname');
 --     end;
 --     if not AO.FieldExist('fullname') then
---        AO.fullname = ФИАС.GetAreaProperty(AO.aoguid, 'fullname');
+--        AO.fullname = Р¤РРђРЎ.GetAreaProperty(AO.aoguid, 'fullname');
 --     end;
-     l = SearchInArray(УровниФИАС, AO.aolevel);
-     prefix = ПрефПолей[l];
+     l = SearchInArray(РЈСЂРѕРІРЅРёР¤РРђРЎ, AO.aolevel);
+     prefix = РџСЂРµС„РџРѕР»РµР№[l];
      if l <> 1 then
        Record.SetField(prefix, AO.formalname);
      else
-       Record.SetField(prefix + "_Стр", AO.formalname);
+       Record.SetField(prefix + "_РЎС‚СЂ", AO.formalname);
      end;
      result = AO.formalname;
-     Record.SetField(prefix + "_Код", ФИАС.GetAreaProperty(AO.aoguid, ПоляФИАС[l]));
+     Record.SetField(prefix + "_РљРѕРґ", Р¤РРђРЎ.GetAreaProperty(AO.aoguid, РџРѕР»СЏР¤РРђРЎ[l]));
      ao_guid[l] = AO.aoguid;
      Cache_subs(AO.aoguid);
-     if УровниКЛАДР[l] = -1 then
-        Record.SetField(prefix + "_Сокр", AO.shortname);
-        Record.SetField(prefix + "_Стат", AO.fullname);
+     if РЈСЂРѕРІРЅРёРљР›РђР”Р [l] = -1 then
+        Record.SetField(prefix + "_РЎРѕРєСЂ", AO.shortname);
+        Record.SetField(prefix + "_РЎС‚Р°С‚", AO.fullname);
      else
-        if Lo(prefix) = "наспункт" then
-           Record.Пункт_Элемент = ЭлементСтат(AO.shortname, AO.fullname, УровниКЛАДР[l]);
+        if Lo(prefix) = "РЅР°СЃРїСѓРЅРєС‚" then
+           Record.РџСѓРЅРєС‚_Р­Р»РµРјРµРЅС‚ = Р­Р»РµРјРµРЅС‚РЎС‚Р°С‚(AO.shortname, AO.fullname, РЈСЂРѕРІРЅРёРљР›РђР”Р [l]);
         else
-           Record.SetField(prefix + "_Элемент",ЭлементСтат(AO.shortname, AO.fullname, УровниКЛАДР[l]));
+           Record.SetField(prefix + "_Р­Р»РµРјРµРЅС‚",Р­Р»РµРјРµРЅС‚РЎС‚Р°С‚(AO.shortname, AO.fullname, РЈСЂРѕРІРЅРёРљР›РђР”Р [l]));
         end;
      end;
   end;
 
   proc UpdGlobal(AO:Storage);
     if AO = nil then
-      Код_Кладр = "";
-      ОКАТО = "";
-      Индекс = "";
+      РљРѕРґ_РљР»Р°РґСЂ = "";
+      РћРљРђРўРћ = "";
+      РРЅРґРµРєСЃ = "";
       SetLastAoGuid("");
     else
-      Код_Кладр = AO.code;
-      ОКАТО = AO.okato;
-      Индекс = AO.postalcode;
+      РљРѕРґ_РљР»Р°РґСЂ = AO.code;
+      РћРљРђРўРћ = AO.okato;
+      РРЅРґРµРєСЃ = AO.postalcode;
       SetLastAoGuid(AO.aoguid);
     fi;
   end;
@@ -151,39 +151,39 @@ inobject
   Proc ClearLevel(AOlevel:Integer);
     var prefix: String;
     var l: Integer;
-    l = SearchInArray(УровниФИАС, AOlevel);
-    prefix = ПрефПолей[l];
+    l = SearchInArray(РЈСЂРѕРІРЅРёР¤РРђРЎ, AOlevel);
+    prefix = РџСЂРµС„РџРѕР»РµР№[l];
     try
       Record.SetField(prefix, "");
     except
-      Record.SetField(prefix + "_Стр", "");
+      Record.SetField(prefix + "_РЎС‚СЂ", "");
     end;
-    Record.SetField(prefix + "_Код", "");
+    Record.SetField(prefix + "_РљРѕРґ", "");
     ao_guid[l] = nil;
-    if УровниКЛАДР[l] = -1 then
-      Record.SetField(prefix + "_Сокр", "");
-      Record.SetField(prefix + "_Стат", "");
+    if РЈСЂРѕРІРЅРёРљР›РђР”Р [l] = -1 then
+      Record.SetField(prefix + "_РЎРѕРєСЂ", "");
+      Record.SetField(prefix + "_РЎС‚Р°С‚", "");
     else
-      if Lo(prefix) = "наспункт" then
-        Record.Пункт_Элемент = nil;
+      if Lo(prefix) = "РЅР°СЃРїСѓРЅРєС‚" then
+        Record.РџСѓРЅРєС‚_Р­Р»РµРјРµРЅС‚ = nil;
       else
-        Record.SetField(prefix + "_Элемент",nil);
+        Record.SetField(prefix + "_Р­Р»РµРјРµРЅС‚",nil);
       end;
     end;
   end;
 
-  func СборУсл(l:Integer):Storage;
-  --Сбор условия на КЛАДЭ в хранилище для запроса в базу ФИАС
+  func РЎР±РѕСЂРЈСЃР»(l:Integer):Storage;
+  --РЎР±РѕСЂ СѓСЃР»РѕРІРёСЏ РЅР° РљР›РђР”Р­ РІ С…СЂР°РЅРёР»РёС‰Рµ РґР»СЏ Р·Р°РїСЂРѕСЃР° РІ Р±Р°Р·Сѓ Р¤РРђРЎ
   var res:Storage;
   var i:Integer;
   var tmp:String;
     res = Storage.Create;
     for i = 1..l-1 do
-        tmp = Record.GetField(ПрефПолей[i] + '_Код');
+        tmp = Record.GetField(РџСЂРµС„РџРѕР»РµР№[i] + '_РљРѕРґ');
         if tmp = nil then
-           res.SetField(ПоляФИАС[i], RepStr('0', РазмерКода[i]));
+           res.SetField(РџРѕР»СЏР¤РРђРЎ[i], RepStr('0', Р Р°Р·РјРµСЂРљРѕРґР°[i]));
         else
-           res.SetField(ПоляФИАС[i], tmp);
+           res.SetField(РџРѕР»СЏР¤РРђРЎ[i], tmp);
         end;
     end;
     Result = res;
@@ -196,14 +196,14 @@ inobject
   var one:Storage;
     ii = LengthOfArray(ao_list);
     if ii = 0 then
-      Message("Не найдено адресных элементов");
+      Message("РќРµ РЅР°Р№РґРµРЅРѕ Р°РґСЂРµСЃРЅС‹С… СЌР»РµРјРµРЅС‚РѕРІ");
       return False;
     end;
     for i = 1..ii do
         one = ao_list[i] as Storage;
         str_list[i] = one.name;
     end;
-    i = Alternate("Выбор элемента адресации",str_list);
+    i = Alternate("Р’С‹Р±РѕСЂ СЌР»РµРјРµРЅС‚Р° Р°РґСЂРµСЃР°С†РёРё",str_list);
     if i <> 0 then
        Result = ao_list[i];
     else
@@ -212,87 +212,87 @@ inobject
   end;
 
   proc FIAS_check(l:Integer);
-  --@doc Пост-обработка для выбора уровня: пустые коды предшественников устанавливаются в нули,
-  --     низлежащие уровни обнуляются
+  --@doc РџРѕСЃС‚-РѕР±СЂР°Р±РѕС‚РєР° РґР»СЏ РІС‹Р±РѕСЂР° СѓСЂРѕРІРЅСЏ: РїСѓСЃС‚С‹Рµ РєРѕРґС‹ РїСЂРµРґС€РµСЃС‚РІРµРЅРЅРёРєРѕРІ СѓСЃС‚Р°РЅР°РІР»РёРІР°СЋС‚СЃСЏ РІ РЅСѓР»Рё,
+  --     РЅРёР·Р»РµР¶Р°С‰РёРµ СѓСЂРѕРІРЅРё РѕР±РЅСѓР»СЏСЋС‚СЃСЏ
   var i:Integer;
         for i = 1 .. l - 1 do
-            if Record.GetField(ПрефПолей[i] + '_Код') = nil then
-                Record.SetField(ПрефПолей[i] + "_Код", RepStr('0', РазмерКода[i]));
+            if Record.GetField(РџСЂРµС„РџРѕР»РµР№[i] + '_РљРѕРґ') = nil then
+                Record.SetField(РџСЂРµС„РџРѕР»РµР№[i] + "_РљРѕРґ", RepStr('0', Р Р°Р·РјРµСЂРљРѕРґР°[i]));
             end;
         end;
-        for i = l + 1 .. LengthOfArray(УровниФИАС) do
-            ClearLevel(УровниФИАС[i]);
+        for i = l + 1 .. LengthOfArray(РЈСЂРѕРІРЅРёР¤РРђРЎ) do
+            ClearLevel(РЈСЂРѕРІРЅРёР¤РРђРЎ[i]);
         end;
 
   end;
 
-  proc ПоказатьТипыАдресов;
-    ТипАдресаНаим = nil;
-    with Query.Create([Базовый.Справочники.ТипАдреса]) do
+  proc РџРѕРєР°Р·Р°С‚СЊРўРёРїС‹РђРґСЂРµСЃРѕРІ;
+    РўРёРїРђРґСЂРµСЃР°РќР°РёРј = nil;
+    with Query.Create([Р‘Р°Р·РѕРІС‹Р№.РЎРїСЂР°РІРѕС‡РЅРёРєРё.РўРёРїРђРґСЂРµСЃР°]) do
       Select;
       while not Eof do
-        СИС2.Функции.AddInArray(ТипАдресаНаим,Current,true);
+        РЎРРЎ2.Р¤СѓРЅРєС†РёРё.AddInArray(РўРёРїРђРґСЂРµСЃР°РќР°РёРј,Current,true);
         Next;
       end;--while not Eof
-      секПозицииТиповАдресов.Count = Count;
+      СЃРµРєРџРѕР·РёС†РёРёРўРёРїРѕРІРђРґСЂРµСЃРѕРІ.Count = Count;
     end;--with Query
   end;
 --}
 
---{События шаблона
-  proc шаблон_ПриОткрытии(Create :Logical);
+--{РЎРѕР±С‹С‚РёСЏ С€Р°Р±Р»РѕРЅР°
+  proc С€Р°Р±Р»РѕРЅ_РџСЂРёРћС‚РєСЂС‹С‚РёРё(Create :Logical);
     var Mapper: XMLRPC.XMLMapper;
     var FileObj:AutoObject;
-    inherited шаблон_ПриОткрытии(Create);
-    ТипАдресаНаим = nil;
-    ТипАдресаПрименен = nil;
-    ПоказатьТипыАдресов;
-    Self.UseFiosm = Библио.UseFiosm;
-    if секцДомСтарое <> nil and секцДомНовое <> nil then
-      секцДомСтарое.Visible = not Self.UseFiosm;
-      секцДомНовое.Visible = Self.UseFiosm;
+    inherited С€Р°Р±Р»РѕРЅ_РџСЂРёРћС‚РєСЂС‹С‚РёРё(Create);
+    РўРёРїРђРґСЂРµСЃР°РќР°РёРј = nil;
+    РўРёРїРђРґСЂРµСЃР°РџСЂРёРјРµРЅРµРЅ = nil;
+    РџРѕРєР°Р·Р°С‚СЊРўРёРїС‹РђРґСЂРµСЃРѕРІ;
+    Self.UseFiosm = Р‘РёР±Р»РёРѕ.UseFiosm;
+    if СЃРµРєС†Р”РѕРјРЎС‚Р°СЂРѕРµ <> nil and СЃРµРєС†Р”РѕРјРќРѕРІРѕРµ <> nil then
+      СЃРµРєС†Р”РѕРјРЎС‚Р°СЂРѕРµ.Visible = not Self.UseFiosm;
+      СЃРµРєС†Р”РѕРјРќРѕРІРѕРµ.Visible = Self.UseFiosm;
     end;
-    ФИАС = GetFIASObj;
+    Р¤РРђРЎ = GetFIASObj;
     hCache = HouseCache.Create;
     sub_cache = Storage.Create;
-    Cache_subs('None');  -- Всегда кешируем 'корень'
-    --Загрузка справочника статусов домов
+    Cache_subs('None');  -- Р’СЃРµРіРґР° РєРµС€РёСЂСѓРµРј 'РєРѕСЂРµРЅСЊ'
+    --Р—Р°РіСЂСѓР·РєР° СЃРїСЂР°РІРѕС‡РЅРёРєР° СЃС‚Р°С‚СѓСЃРѕРІ РґРѕРјРѕРІ
     FileObj = AutoObject.Create("Msxml2.DOMDocument.6.0");
-    СИС2.Файл.СинхронизироватьФайлы(BaseInfo.ProjectByName["АдресК"].Folder + "\\Shared\\AS_ESTSTAT.XML",
+    РЎРРЎ2.Р¤Р°Р№Р».РЎРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°С‚СЊР¤Р°Р№Р»С‹(BaseInfo.ProjectByName["РђРґСЂРµСЃРљ"].Folder + "\\Shared\\AS_ESTSTAT.XML",
                                     SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
     FileObj.load(SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
-    Mapper = Библио.EstStatMapper;
-    СтатДомов = Mapper.ParseNode(FileObj.documentElement).EstateStatus as Storage[];
-  end;--proc шаблон_ПриОткрытии
+    Mapper = Р‘РёР±Р»РёРѕ.EstStatMapper;
+    РЎС‚Р°С‚Р”РѕРјРѕРІ = Mapper.ParseNode(FileObj.documentElement).EstateStatus as Storage[];
+  end;--proc С€Р°Р±Р»РѕРЅ_РџСЂРёРћС‚РєСЂС‹С‚РёРё
 
 
-  proc шаблон_ПриСчитывании;
+  proc С€Р°Р±Р»РѕРЅ_РџСЂРёРЎС‡РёС‚С‹РІР°РЅРёРё;
     var k, j: integer;
     var tmpSt: Storage;
-    inherited шаблон_ПриСчитывании;
-    if секПозицииТиповАдресов <> nil then
-      for k = 1..секПозицииТиповАдресов.Count do
-        ТипАдресаПрименен[k] = false;
-        for j = 1..Позиции.Count do
-          if Позиции.Items[j].ТипАдреса=ТипАдресаНаим[k] then
-            ТипАдресаПрименен[k]  = true;
+    inherited С€Р°Р±Р»РѕРЅ_РџСЂРёРЎС‡РёС‚С‹РІР°РЅРёРё;
+    if СЃРµРєРџРѕР·РёС†РёРёРўРёРїРѕРІРђРґСЂРµСЃРѕРІ <> nil then
+      for k = 1..СЃРµРєРџРѕР·РёС†РёРёРўРёРїРѕРІРђРґСЂРµСЃРѕРІ.Count do
+        РўРёРїРђРґСЂРµСЃР°РџСЂРёРјРµРЅРµРЅ[k] = false;
+        for j = 1..РџРѕР·РёС†РёРё.Count do
+          if РџРѕР·РёС†РёРё.Items[j].РўРёРїРђРґСЂРµСЃР°=РўРёРїРђРґСЂРµСЃР°РќР°РёРј[k] then
+            РўРёРїРђРґСЂРµСЃР°РџСЂРёРјРµРЅРµРЅ[k]  = true;
             Break;
           end;
         end;--for j
       end;--for k
     end;
-    j = LengthOfArray(УровниФИАС);
+    j = LengthOfArray(РЈСЂРѕРІРЅРёР¤РРђРЎ);
     for k = 1..j do
-      tmpSt = СборУсл(k + 1);
-      tmpSt.aolevel = УровниФИАС[k];
-      ao_guid[k] = ФИАС.GetAreasAsync(tmpSt, '');
+      tmpSt = РЎР±РѕСЂРЈСЃР»(k + 1);
+      tmpSt.aolevel = РЈСЂРѕРІРЅРёР¤РРђРЎ[k];
+      ao_guid[k] = Р¤РРђРЎ.GetAreasAsync(tmpSt, '');
       if k>1 and ao_guid[k] = ao_guid[k-1] then
         ao_guid[k].abort;
         ao_guid[k] = nil;
       else
-        --Добавляем постобработку чтобы получать ГУИД из списка
-        ao_guid[k].postprocess = XMLRPC.ClassMeth.CreateEx("АдресК.Библио.AGfromAreas");
-        --И подвешиваем автоматическое кэширование подчиненных
+        --Р”РѕР±Р°РІР»СЏРµРј РїРѕСЃС‚РѕР±СЂР°Р±РѕС‚РєСѓ С‡С‚РѕР±С‹ РїРѕР»СѓС‡Р°С‚СЊ Р“РЈРР” РёР· СЃРїРёСЃРєР°
+        ao_guid[k].postprocess = XMLRPC.ClassMeth.CreateEx("РђРґСЂРµСЃРљ.Р‘РёР±Р»РёРѕ.AGfromAreas");
+        --Р РїРѕРґРІРµС€РёРІР°РµРј Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРµ РєСЌС€РёСЂРѕРІР°РЅРёРµ РїРѕРґС‡РёРЅРµРЅРЅС‹С…
         ao_guid[k].AutoPoll(self, 'Cache_subs');
       fi;
     end;
@@ -301,36 +301,36 @@ inobject
     end;
     LAGPrefetch = RequestAoGuid;
     LAGPrefetch.AutoPoll(self, 'LAGfromAreas');
-  end;--proc шаблон_ПриСчитывании
+  end;--proc С€Р°Р±Р»РѕРЅ_РџСЂРёРЎС‡РёС‚С‹РІР°РЅРёРё
 --}
 
---{События полей шаблона
-  proc Поле_ПриВыходе(Cell :TemplateCell; Index :Integer);
+--{РЎРѕР±С‹С‚РёСЏ РїРѕР»РµР№ С€Р°Р±Р»РѕРЅР°
+  proc РџРѕР»Рµ_РџСЂРёР’С‹С…РѕРґРµ(Cell :TemplateCell; Index :Integer);
     var j : integer;
     if Cell.Value = false then
-      for j = 1..Позиции.Count do
-        if Позиции.Items[j].ТипАдреса = ТипАдресаНаим[Index] then
-          Позиции.Delete(j);
+      for j = 1..РџРѕР·РёС†РёРё.Count do
+        if РџРѕР·РёС†РёРё.Items[j].РўРёРїРђРґСЂРµСЃР° = РўРёРїРђРґСЂРµСЃР°РќР°РёРј[Index] then
+          РџРѕР·РёС†РёРё.Delete(j);
           Break;
         end;
       end;--for j
     else
-      Позиции.Insert(Позиции.Count+1);
-      Позиции.Items[Позиции.Count].ТипАдреса = ТипАдресаНаим[Index];
+      РџРѕР·РёС†РёРё.Insert(РџРѕР·РёС†РёРё.Count+1);
+      РџРѕР·РёС†РёРё.Items[РџРѕР·РёС†РёРё.Count].РўРёРїРђРґСЂРµСЃР° = РўРёРїРђРґСЂРµСЃР°РќР°РёРј[Index];
     end;--if Cell.Value
-  end;--proc Поле_ПриВыходе
+  end;--proc РџРѕР»Рµ_РџСЂРёР’С‹С…РѕРґРµ
 
 
-  func Поле_СтрПриОбзоре(Cell: TemplateCell; Value: Variant; var NewValue :Variant) :Logical;
+  func РџРѕР»Рµ_РЎС‚СЂРџСЂРёРћР±Р·РѕСЂРµ(Cell: TemplateCell; Value: Variant; var NewValue :Variant) :Logical;
     var filter_by:Storage;
     var l: Integer;
     var i, ii: Integer;
     var tmp:Variant;
     var tmpGuid:String;
     if Self.UseFiosm then
-      l = SearchInArray(ПрефПолей, ExtractWord(Cell.Contents, 1, "_"));
+      l = SearchInArray(РџСЂРµС„РџРѕР»РµР№, ExtractWord(Cell.Contents, 1, "_"));
       tmp = nil;
-      --Надо найти предыдущий ненулевой элемент
+      --РќР°РґРѕ РЅР°Р№С‚Рё РїСЂРµРґС‹РґСѓС‰РёР№ РЅРµРЅСѓР»РµРІРѕР№ СЌР»РµРјРµРЅС‚
       ii = l;
       tmpGuid = '';
       for i = (ii - 1) .. 1 step -1 do
@@ -345,38 +345,38 @@ inobject
       if tmpGuid = '' then
         tmpGuid = 'None';
       end;
-      --Если есть закэшированный список - выведем его
+      --Р•СЃР»Рё РµСЃС‚СЊ Р·Р°РєСЌС€РёСЂРѕРІР°РЅРЅС‹Р№ СЃРїРёСЃРѕРє - РІС‹РІРµРґРµРј РµРіРѕ
       if tmpGuid <> nil and sub_cache.FieldExists(tmpGuid):
         if sub_cache.GetField(tmpGuid) is XMLRPC.AsyncResult then
           if sub_cache.GetField(tmpGuid).ready then
             tmp = sub_cache.GetField(tmpGuid).Get;
-            --Ну и сохраним заодно чтобы не парсить заново
+            --РќСѓ Рё СЃРѕС…СЂР°РЅРёРј Р·Р°РѕРґРЅРѕ С‡С‚РѕР±С‹ РЅРµ РїР°СЂСЃРёС‚СЊ Р·Р°РЅРѕРІРѕ
             sub_cache.SetField(tmpGuid, tmp);
           end;
-        else  --уже распарсен
+        else  --СѓР¶Рµ СЂР°СЃРїР°СЂСЃРµРЅ
           tmp = sub_cache.GetField(tmpGuid);
         end;
-        --Доппроверка too_much
+        --Р”РѕРїРїСЂРѕРІРµСЂРєР° too_much
         if tmp is Storage and tmp.FieldExist('too_much') then
           if tmp.too_much then
-            tmp = 'Слишком много элементов, уточните запрос';
+            tmp = 'РЎР»РёС€РєРѕРј РјРЅРѕРіРѕ СЌР»РµРјРµРЅС‚РѕРІ, СѓС‚РѕС‡РЅРёС‚Рµ Р·Р°РїСЂРѕСЃ';
           end;
         end;
-        --Вытаскивание массива
+        --Р’С‹С‚Р°СЃРєРёРІР°РЅРёРµ РјР°СЃСЃРёРІР°
         if tmp is Storage and tmp.FieldExist('sub') then
           tmp = tmp.sub;
         end;
-        if varType(tmp) = 8 then  --Тут еще может быть строка с ошибкой
-          tmp = XMLRPC.Библио.Filter('aolevel = "'+Str(УровниФИАС[l])+'"', tmp as Object[]);
-        elsif varType(tmp) <> 1:  --А если тут не строка, то похоже пришел какой-то мусор
+        if varType(tmp) = 8 then  --РўСѓС‚ РµС‰Рµ РјРѕР¶РµС‚ Р±С‹С‚СЊ СЃС‚СЂРѕРєР° СЃ РѕС€РёР±РєРѕР№
+          tmp = XMLRPC.Р‘РёР±Р»РёРѕ.Filter('aolevel = "'+Str(РЈСЂРѕРІРЅРёР¤РРђРЎ[l])+'"', tmp as Object[]);
+        elsif varType(tmp) <> 1:  --Рђ РµСЃР»Рё С‚СѓС‚ РЅРµ СЃС‚СЂРѕРєР°, С‚Рѕ РїРѕС…РѕР¶Рµ РїСЂРёС€РµР» РєР°РєРѕР№-С‚Рѕ РјСѓСЃРѕСЂ
           tmp = nil;
         end;
       end;
       if tmp = nil then
-        --Если с кэшем не срослось - запрашиваем из базы
-        filter_by = СборУсл(l);
-        filter_by.aolevel = УровниФИАС[l];
-        tmp = ФИАС.GetAreas(filter_by,);
+        --Р•СЃР»Рё СЃ РєСЌС€РµРј РЅРµ СЃСЂРѕСЃР»РѕСЃСЊ - Р·Р°РїСЂР°С€РёРІР°РµРј РёР· Р±Р°Р·С‹
+        filter_by = РЎР±РѕСЂРЈСЃР»(l);
+        filter_by.aolevel = РЈСЂРѕРІРЅРёР¤РРђРЎ[l];
+        tmp = Р¤РРђРЎ.GetAreas(filter_by,);
       end;
       if VarType(tmp) = varString  then
         Message(tmp);
@@ -399,33 +399,33 @@ inobject
     end;
   end;
 
-  func Поле_СтрПриПроверке(Cell: TemplateCell; Index: Integer; var Value: Variant): Logical;
+  func РџРѕР»Рµ_РЎС‚СЂРџСЂРёРџСЂРѕРІРµСЂРєРµ(Cell: TemplateCell; Index: Integer; var Value: Variant): Logical;
     var filter_by:Storage;
     var l: Integer;
     var tmp:Variant;
     var tmpa:Storage[];
     if Self.UseFiosm then
-      l = SearchInArray(ПрефПолей, ExtractWord(Cell.Contents, 1, "_"));
+      l = SearchInArray(РџСЂРµС„РџРѕР»РµР№, ExtractWord(Cell.Contents, 1, "_"));
       if Value = "" then   --Delete
         FIAS_check(l-1);
         UpdGlobal(nil);
-        return True;  --Ручной ввод
+        return True;  --Р СѓС‡РЅРѕР№ РІРІРѕРґ
       end;
       if Record.GetField(Cell.Contents) = Value then
-        return True;  --Ничего не изменилось
+        return True;  --РќРёС‡РµРіРѕ РЅРµ РёР·РјРµРЅРёР»РѕСЃСЊ
       end;
-      filter_by = СборУсл(l);
-      filter_by.aolevel = УровниФИАС[l];
-      tmp = ФИАС.GetAreas(filter_by,'%'+Value+'%');--SimpleCall("http://127.0.0.1:8080/","GetAreas",[filter_by])[1];
+      filter_by = РЎР±РѕСЂРЈСЃР»(l);
+      filter_by.aolevel = РЈСЂРѕРІРЅРёР¤РРђРЎ[l];
+      tmp = Р¤РРђРЎ.GetAreas(filter_by,'%'+Value+'%');--SimpleCall("http://127.0.0.1:8080/","GetAreas",[filter_by])[1];
       if VarType(tmp) = varString  then
         Message(tmp);
         return False;
       else
         tmpa = tmp as Storage[];
         if LengthOfArray(tmpa) = 0 then
-          FIAS_check(l-1); -- -1 чтобы обнулить свой уровень
+          FIAS_check(l-1); -- -1 С‡С‚РѕР±С‹ РѕР±РЅСѓР»РёС‚СЊ СЃРІРѕР№ СѓСЂРѕРІРµРЅСЊ
           UpdGlobal(nil);
-          return True;  --Ручной ввод
+          return True;  --Р СѓС‡РЅРѕР№ РІРІРѕРґ
         elsif LengthOfArray(tmpa) = 1 then
           tmp = tmpa[1];
         else
@@ -434,7 +434,7 @@ inobject
         if tmp = False then
           FIAS_check(l);
           UpdGlobal(nil);
-          return True;  --Ручной ввод
+          return True;  --Р СѓС‡РЅРѕР№ РІРІРѕРґ
         else
           tmp = tmp as Storage;
           Value = SaveLevel(tmp);
@@ -444,29 +444,29 @@ inobject
       end;
     else
       if Cell.Value <> Value then
-        if Cell.Contents = 'Регион_Стр' then Регион_Код = nil;
-        elsif Cell.Contents = 'Округ' then Округ_Код = nil;
-        elsif Cell.Contents = 'Район' then Район_Код = nil;
-        elsif Cell.Contents = 'Город' then Город_Код = nil;
-        elsif Cell.Contents = 'Терр' then Терр_Код = nil;
-        elsif Cell.Contents = 'НасПункт' then НасПункт_Код = nil;
-        elsif Cell.Contents = 'Улица' then Улица_Код = nil;
-        elsif Cell.Contents = 'ДопТерр' then ДопТерр_Код = nil;
-        elsif Cell.Contents = 'ДопАЭ' then ДопАЭ_Код = nil;
+        if Cell.Contents = 'Р РµРіРёРѕРЅ_РЎС‚СЂ' then Р РµРіРёРѕРЅ_РљРѕРґ = nil;
+        elsif Cell.Contents = 'РћРєСЂСѓРі' then РћРєСЂСѓРі_РљРѕРґ = nil;
+        elsif Cell.Contents = 'Р Р°Р№РѕРЅ' then Р Р°Р№РѕРЅ_РљРѕРґ = nil;
+        elsif Cell.Contents = 'Р“РѕСЂРѕРґ' then Р“РѕСЂРѕРґ_РљРѕРґ = nil;
+        elsif Cell.Contents = 'РўРµСЂСЂ' then РўРµСЂСЂ_РљРѕРґ = nil;
+        elsif Cell.Contents = 'РќР°СЃРџСѓРЅРєС‚' then РќР°СЃРџСѓРЅРєС‚_РљРѕРґ = nil;
+        elsif Cell.Contents = 'РЈР»РёС†Р°' then РЈР»РёС†Р°_РљРѕРґ = nil;
+        elsif Cell.Contents = 'Р”РѕРїРўРµСЂСЂ' then Р”РѕРїРўРµСЂСЂ_РљРѕРґ = nil;
+        elsif Cell.Contents = 'Р”РѕРїРђР­' then Р”РѕРїРђР­_РљРѕРґ = nil;
         end;
       end;
     end;
-    Result = True; -- Разрешаем сохранить изменения в поле
+    Result = True; -- Р Р°Р·СЂРµС€Р°РµРј СЃРѕС…СЂР°РЅРёС‚СЊ РёР·РјРµРЅРµРЅРёСЏ РІ РїРѕР»Рµ
   end;
 
 --{
---    func ПолеДом_стрПриОбзоре(Cell :TemplateCell; Value :Variant;
+--    func РџРѕР»РµР”РѕРј_СЃС‚СЂРџСЂРёРћР±Р·РѕСЂРµ(Cell :TemplateCell; Value :Variant;
 --                            var NewValue :Variant) :Logical;
---    -- Обработка события нажатия у клетки кнопки обзора
---    -- Параметры:
---    --   Cell: клетка шаблона
---    --   Value: старое значение в поле. Его тип зависит от типа поля.
---    --   NewValue: новое значение в поле. Его тип зависит от типа поля.
+--    -- РћР±СЂР°Р±РѕС‚РєР° СЃРѕР±С‹С‚РёСЏ РЅР°Р¶Р°С‚РёСЏ Сѓ РєР»РµС‚РєРё РєРЅРѕРїРєРё РѕР±Р·РѕСЂР°
+--    -- РџР°СЂР°РјРµС‚СЂС‹:
+--    --   Cell: РєР»РµС‚РєР° С€Р°Р±Р»РѕРЅР°
+--    --   Value: СЃС‚Р°СЂРѕРµ Р·РЅР°С‡РµРЅРёРµ РІ РїРѕР»Рµ. Р•РіРѕ С‚РёРї Р·Р°РІРёСЃРёС‚ РѕС‚ С‚РёРїР° РїРѕР»СЏ.
+--    --   NewValue: РЅРѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ РІ РїРѕР»Рµ. Р•РіРѕ С‚РёРї Р·Р°РІРёСЃРёС‚ РѕС‚ С‚РёРїР° РїРѕР»СЏ.
 --    var l: Integer;
 --    var filter_by:Storage;
 --    var tmp:Variant;
@@ -497,29 +497,29 @@ inobject
 ----    cbox.Setfocus;
 ----    Template.BeginEdit;
 
-----    i = Alternate("Выбор региона",str_list);
+----    i = Alternate("Р’С‹Р±РѕСЂ СЂРµРіРёРѕРЅР°",str_list);
 ----    if i <> 0 then
 ----       tmp = tmpa[i];
-----       Дом_Стр = tmp.onestr;
-----       Result = false; -- Продолжаем стандартную обработку
+----       Р”РѕРј_РЎС‚СЂ = tmp.onestr;
+----       Result = false; -- РџСЂРѕРґРѕР»Р¶Р°РµРј СЃС‚Р°РЅРґР°СЂС‚РЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ
 ----    else
 ----       Result = false;
 ----    end;
 --  end;
 --}
 
-  func ПолеДом_ПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+  func РџРѕР»РµР”РѕРј_РџСЂРёР’С…РѕРґРµ(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
     Return true;
   end;
 
-  func ПолеДом_ПриОбзоре(Cell: TemplateCell; Value: Variant; var NewValue :Variant) :Logical;
+  func РџРѕР»РµР”РѕРј_РџСЂРёРћР±Р·РѕСЂРµ(Cell: TemplateCell; Value: Variant; var NewValue :Variant) :Logical;
     Return true;
   end;
 
-  proc ПолеДом_ПриВыходе(Cell :TemplateCell; Index :Integer);
+  proc РџРѕР»РµР”РѕРј_РџСЂРёР’С‹С…РѕРґРµ(Cell :TemplateCell; Index :Integer);
   end;
 
-  func ПолеДом_стрПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+  func РџРѕР»РµР”РѕРј_СЃС‚СЂРџСЂРёР’С…РѕРґРµ(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
     var pairs:String[2];
     var i:Integer;
     var ii:Integer;
@@ -530,10 +530,10 @@ inobject
         Cell.List.Add(pairs[1, i] + "|");
     end;
     Cell.List.Sort;
-    Result = True; -- Разрешаем войти в поле
+    Result = True; -- Р Р°Р·СЂРµС€Р°РµРј РІРѕР№С‚Рё РІ РїРѕР»Рµ
   end;
 
-  proc ПолеДом_стрПриВыходе(Cell :TemplateCell; Index :Integer);
+  proc РџРѕР»РµР”РѕРј_СЃС‚СЂРџСЂРёР’С‹С…РѕРґРµ(Cell :TemplateCell; Index :Integer);
     var reqpar:String[];
     var tmp:Storage;
     var pairs:String[2];
@@ -544,34 +544,34 @@ inobject
     pairs = hCache.gethouses(LastAoGuid);
     i = SearchInArray(pairs[1], Cell.Value);
     if i>0 then
-      tmp = ФИАС.GetBuildingProperties(pairs[2, i], reqpar);
-      Record.Дом_Н = tmp.housenum;
-      Record.Дом_К = tmp.buildnum;
-      Record.Дом_С = tmp.strucnum;
-      Record.Индекс = tmp.postalcode;
-      Record.ОКАТО = tmp.okato;
-      --тип дома
-      for j = 1 .. LengthOfArray(СтатДомов) do
-        if СтатДомов[j].ESTSTATID = Int(tmp.eststatus) then
-           Дом_Элемент = ЭлементСтат(СтатДомов[j].NAME,СтатДомов[j].NAME,6);
+      tmp = Р¤РРђРЎ.GetBuildingProperties(pairs[2, i], reqpar);
+      Record.Р”РѕРј_Рќ = tmp.housenum;
+      Record.Р”РѕРј_Рљ = tmp.buildnum;
+      Record.Р”РѕРј_РЎ = tmp.strucnum;
+      Record.РРЅРґРµРєСЃ = tmp.postalcode;
+      Record.РћРљРђРўРћ = tmp.okato;
+      --С‚РёРї РґРѕРјР°
+      for j = 1 .. LengthOfArray(РЎС‚Р°С‚Р”РѕРјРѕРІ) do
+        if РЎС‚Р°С‚Р”РѕРјРѕРІ[j].ESTSTATID = Int(tmp.eststatus) then
+           Р”РѕРј_Р­Р»РµРјРµРЅС‚ = Р­Р»РµРјРµРЅС‚РЎС‚Р°С‚(РЎС‚Р°С‚Р”РѕРјРѕРІ[j].NAME,РЎС‚Р°С‚Р”РѕРјРѕРІ[j].NAME,6);
         end;
       end;
-      --Поля для совместимости
-      Record.Корпус = Record.Дом_К;
-      Record.Дом = Record.Дом_Н;
-      if Record.Дом_С <> nil then
-         if Record.Корпус = nil then
-            Record.Дом = Record.Дом + ' c.' + Record.Дом_С;
+      --РџРѕР»СЏ РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё
+      Record.РљРѕСЂРїСѓСЃ = Record.Р”РѕРј_Рљ;
+      Record.Р”РѕРј = Record.Р”РѕРј_Рќ;
+      if Record.Р”РѕРј_РЎ <> nil then
+         if Record.РљРѕСЂРїСѓСЃ = nil then
+            Record.Р”РѕРј = Record.Р”РѕРј + ' c.' + Record.Р”РѕРј_РЎ;
          else
-            Record.Корпус = Record.Корпус + ' c.' + Record.Дом_С;
+            Record.РљРѕСЂРїСѓСЃ = Record.РљРѕСЂРїСѓСЃ + ' c.' + Record.Р”РѕРј_РЎ;
          end;
       end;
     end;
   end;
 
-  func АвтоАдрес_Общее_ПриНажатии(Cell: TemplateCell; Action: Template.ClickTypes): Logical;
-    Адрес_Строкой = Базовый.Справочники.интАдрес.Адрес_Общий(Record);
-    Result = True; -- Разрешаем стандартную обработку
+  func РђРІС‚РѕРђРґСЂРµСЃ_РћР±С‰РµРµ_РџСЂРёРќР°Р¶Р°С‚РёРё(Cell: TemplateCell; Action: Template.ClickTypes): Logical;
+    РђРґСЂРµСЃ_РЎС‚СЂРѕРєРѕР№ = Р‘Р°Р·РѕРІС‹Р№.РЎРїСЂР°РІРѕС‡РЅРёРєРё.РёРЅС‚РђРґСЂРµСЃ.РђРґСЂРµСЃ_РћР±С‰РёР№(Record);
+    Result = True; -- Р Р°Р·СЂРµС€Р°РµРј СЃС‚Р°РЅРґР°СЂС‚РЅСѓСЋ РѕР±СЂР°Р±РѕС‚РєСѓ
   end;
 
 --}

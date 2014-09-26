@@ -1,4 +1,4 @@
-class "Profile";
+﻿class "Profile";
 
 inclass
   proc Init;

@@ -1,4 +1,4 @@
-class inherited XMLRPC.XMLRPC_Proxy "";
+п»їclass inherited XMLRPC.XMLRPC_Proxy "";
 import XMLRPC classes XMLMapper, MapperNode, AsyncResult;
 inclass
   func BuildingsMapper:XMLMapper;
@@ -16,7 +16,7 @@ inclass
     res.fields[2].nodename = 'too_much';
     res.fields[2].fieldname = 'too_much';
     res.fields[2].nodekind = 1;
-    res.fields[2].nodetype = 4; --varLogical : Integer = 4;  -- Логическое (булево) значение
+    res.fields[2].nodetype = 4; --varLogical : Integer = 4;  -- Р›РѕРіРёС‡РµСЃРєРѕРµ (Р±СѓР»РµРІРѕ) Р·РЅР°С‡РµРЅРёРµ
     res.fields[2].repeatable = False;
 
     return res;
@@ -36,13 +36,13 @@ inobject
     var BldMapper:XMLMapper;
     var tgt_url:String;
     tgt_url = rest_URL + 'list/' + AO_GUID + '/all_b';
-    if WaitingAsync <> nil then --Сброс "чужого" запроса
+    if WaitingAsync <> nil then --РЎР±СЂРѕСЃ "С‡СѓР¶РѕРіРѕ" Р·Р°РїСЂРѕСЃР°
        if WaitingAsync.id <> tgt_url then
           WaitingAsync.abort;
           WaitingAsync = nil;
        end;
     end;
-    if WaitingAsync = nil then --если запрос есть, значит от "наш"
+    if WaitingAsync = nil then --РµСЃР»Рё Р·Р°РїСЂРѕСЃ РµСЃС‚СЊ, Р·РЅР°С‡РёС‚ РѕС‚ "РЅР°С€"
       BldMapper =  BuildingsMapper;
       WaitingAsync = XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
     fi;
