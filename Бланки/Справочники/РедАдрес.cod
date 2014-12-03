@@ -229,6 +229,10 @@ inobject
   proc ПоказатьТипыАдресов;
     ТипАдресаНаим = nil;
     with Query.Create([Базовый.Справочники.ТипАдреса]) do
+      Order = 'Номер';
+      if true in [Субъект.ФизическоеЛицо,Субъект.Сотрудник] then
+        Filter = 'ДляФизлиц';
+      fi;
       Select;
       while not Eof do
         СИС2.Функции.AddInArray(ТипАдресаНаим,Current,true);
