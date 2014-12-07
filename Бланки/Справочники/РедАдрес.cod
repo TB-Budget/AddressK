@@ -30,6 +30,18 @@ inobject
   var секПозицииТиповАдресов: TemplateSection;--новая секция
   var секцДомНовое: TemplateSection;
   var секцДомСтарое: TemplateSection;
+
+  proc Поле_СокрПриВыходе(Cell :TemplateCell; Index :Integer);
+    -- Обработка события выхода из редактируемого поля
+    -- Параметры:
+    --   Cell: клетка шаблона
+    --   Index: номер кадра, в котором находится клетка
+    var i: Integer;
+    i = SearchInArray(ПрефПолей, ExtractWord(Cell.Contents, 1, "_"));
+    --Обнуление расшифрованной статусной части при ручном заполнении сокращения
+    Record.SetField(ПрефПолей[i] + "_Стат", "");
+  end;
+
 --}
 
 --{Поля шаблона
