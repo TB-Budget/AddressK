@@ -32,6 +32,7 @@ inclass Private
                          ):String;
     var ar_res: String[];
     var res: String;
+    var tmpS: String;
     var i, ii:Integer;
     --Пустой адрес - пустой результат
     if aRecord = nil then
@@ -50,7 +51,17 @@ inclass Private
 
     ii = LengthOfArray(ПрефПолей);
     for i = 2 .. ii do
-       СИС2.Функции.AddInArray(ar_res,  aRecord.GetField(ПрефПолей[i]));
+       tmpS = aRecord.GetField(ПрефПолей[i]);
+       if УровниКЛАДР[i] = -1 then
+         tmpS = tmpS + " " + aRecord.GetField(ПрефПолей[i] + "_Сокр");
+       else
+         if Lo(ПрефПолей[i]) = "наспункт" then
+            tmpS = tmpS + " " + aRecord.Пункт_Элемент.Код;
+         else
+            tmpS = tmpS + " " + aRecord.GetField(ПрефПолей[i] + "_Элемент").Код;
+         end;
+       end;
+       СИС2.Функции.AddInArray(ar_res, Trim(tmpS));
     end;
 
     if аФорматАдреса = афвПФР then
