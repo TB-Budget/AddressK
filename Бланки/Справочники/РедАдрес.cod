@@ -97,7 +97,7 @@ inobject
   proc LAGfromAreas(Areas: Variant);
     var tmpa: Storage[];
     var tmp: Storage;
-    if not Areas = 'Too big list' then
+    if not (varType(Areas) = varString and Areas = 'Too big list') then
       tmpa = Areas as Storage[];
       tmp = tmpa[1];
       SetLastAoGuid(tmp.aoguid);
