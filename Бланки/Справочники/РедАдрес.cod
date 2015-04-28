@@ -491,6 +491,21 @@ inobject
     Result = True; -- Разрешаем сохранить изменения в поле
   end;
 
+  func ПолеДата_ПриПроверке(Cell :TemplateCell; Index :Integer; var Value :Variant) :Logical;
+    Result  = true;
+    if Cell.Contents = 'Дата' then
+       if Value>ДатаОкончания and ДатаОкончания<>nil then
+         Message('Дата начала не может быть позже, чем дата окончания!');
+         Result  = false;
+       end;
+    elsif Cell.Contents = 'ДатаОкончания' then
+      if Дата>Value and Value<>nil and Дата<>nil then
+         Message('Дата начала не может быть позже, чем дата окончания!');
+         Result  = false;
+      end;
+    end;
+  end;
+
 --{
 --    func ПолеДом_стрПриОбзоре(Cell :TemplateCell; Value :Variant;
 --                            var NewValue :Variant) :Logical;
