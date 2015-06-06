@@ -57,7 +57,7 @@ inobject
   var hCache: HouseCache;
   var СтатДомов: Storage[];  --загружаемая при запуске база статусов домов
                              --очень маленькая, поэтому не храним в БД
-  var LAGPrefetch: XMLRPC.AsyncResult;
+  var LAGPrefetch: TUL.Promise;
 --}
 
 --{Вспомогательные процедуры и функции
@@ -67,7 +67,7 @@ inobject
     end;
   end;
 
-  func RequestAoGuid: XMLRPC.AsyncResult;
+  func RequestAoGuid: TUL.Promise;
     var n, i, ii: Integer;
     var tmp: Variant;
     var filter_by:Storage;
@@ -323,16 +323,16 @@ inobject
         ao_guid[k] = nil;
       else
         --Добавляем постобработку чтобы получать ГУИД из списка
-        ao_guid[k].postprocess = XMLRPC.ClassMeth.CreateEx("АдресК.Библио.AGfromAreas");
+        ao_guid[k].postprocess = TUL.ClassMeth.CreateExS("АдресК.Библио.AGfromAreas");
         --И подвешиваем автоматическое кэширование подчиненных
-        ao_guid[k].AutoPoll(self, 'Cache_subs');
+        ao_guid[k].AutoPoll(TUL.Method.CreateEx(self, 'Cache_subs'));
       fi;
     end;
     if LAGPrefetch <> nil then
       LAGPrefetch.abort;
     end;
     LAGPrefetch = RequestAoGuid;
-    LAGPrefetch.AutoPoll(self, 'LAGfromAreas');
+    LAGPrefetch.then_(TUL.Method.CreateEx(self, 'LAGfromAreas'));
   end;--proc шаблон_ПриСчитывании
 --}
 
@@ -367,7 +367,7 @@ inobject
       tmpGuid = '';
       for i = (ii - 1) .. 1 step -1 do
         if ao_guid[i] <> nil:
-          if ao_guid[i] is XMLRPC.AsyncResult:
+          if ao_guid[i] is TUL.AsyncResult:
             ao_guid[i] = ao_guid[i].Get;
           fi;
           tmpGuid = ao_guid[i];
@@ -379,7 +379,7 @@ inobject
       end;
       --Если есть закэшированный список - выведем его
       if tmpGuid <> nil and sub_cache.FieldExists(tmpGuid):
-        if sub_cache.GetField(tmpGuid) is XMLRPC.AsyncResult then
+        if sub_cache.GetField(tmpGuid) is TUL.AsyncResult then
           if sub_cache.GetField(tmpGuid).ready then
             tmp = sub_cache.GetField(tmpGuid).Get;
             --Ну и сохраним заодно чтобы не парсить заново

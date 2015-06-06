@@ -32,7 +32,6 @@ inobject
   func gethouses(aoguid:String):String[2];
     var i:Integer;
     var ii:Integer;
-    var tmp:Variant;
     var tmpa:Storage[];
     var pairs:String[2];
     if not cache.FieldExist(aoguid) then

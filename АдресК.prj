@@ -4,6 +4,7 @@
   <Usage>
     <Project Name="Базовый"/>
     <Project Name="XMLRPC"/>
+    <Project Name="TUL"/>
   </Usage>
   <Groups>
     <Group Name="Справочники" Type="Documents" Disabled="False"/>

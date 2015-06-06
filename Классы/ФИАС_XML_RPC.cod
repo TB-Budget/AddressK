@@ -15,7 +15,7 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 class inherited XMLRPC.XMLRPC_Proxy "";
-import XMLRPC classes XMLMapper, MapperNode, AsyncResult;
+import XMLRPC classes XMLMapper, MapperNode;
 inclass
   func BuildingsMapper:XMLMapper;
     var res: XMLMapper;
@@ -38,10 +38,17 @@ inclass
     return res;
   end;
 
-  WaitingAsync: XMLRPC.AsyncResult;
+  WaitingAsync: XMLRPC.HTTPAsync;
+  func CreateEx(URL: String): ФИАС_XML_RPC;
+    Result = inherited CreateEx(URL);
+    Result.BldFetch = SimpleRestGet.CreateEx('list/', BuildingsMapper);
+    Result.GetAreasFunc = XMLRPC.XMLRPCFunc.CreateEx(URL, "GetAreas", false);
+  end;
 
 inobject
   var rest_URL:String;
+  var BldFetch: SimpleRestGet;
+  var GetAreasFunc: XMLRPC.XMLRPCFunc;
 
   func GetBuildingProperties(AO_GUID:String;Proplist:Variant):Storage;
     Result = _Execute_single("GetBuildingProperties", [AO_GUID, Proplist]) as Storage;
@@ -49,7 +56,6 @@ inobject
 
 
   proc PollBuildings(AO_GUID:String);
-    var BldMapper:XMLMapper;
     var tgt_url:String;
     tgt_url = rest_URL + 'list/' + AO_GUID + '/all_b';
     if WaitingAsync <> nil then --Сброс "чужого" запроса
@@ -59,8 +65,10 @@ inobject
        end;
     end;
     if WaitingAsync = nil then --если запрос есть, значит от "наш"
-      BldMapper =  BuildingsMapper;
-      WaitingAsync = XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
+      --BldMapper =  BuildingsMapper;
+      --WaitingAsync = XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
+      self.BldFetch.Host = rest_URL + 'list/';
+      WaitingAsync = self.BldFetch.Call([AO_GUID + '/all_b']);
     fi;
   end;
 
@@ -81,18 +89,13 @@ inobject
     Result = _Execute_single("GetAreas", [filter_by, Name_like]);
   end;
 
-  func GetAreasAsync(filter_by:Storage; Name_like:String=''):AsyncResult;
-
-    return XMLRPC.AsyncResult.XMLRPCAsync(self.URL, "GetAreas", 
-                                          [filter_by, Name_like], false);
+  func GetAreasAsync(filter_by:Storage; Name_like:String=''):TUL.AsyncResult;
+    return GetAreasFunc.Call([filter_by, Name_like]);
   end;
 
-  func GetSubsAsync(aoguid:String):AsyncResult;
-    var BldMapper:XMLMapper;
-    var tgt_url:String;
-    tgt_url = rest_URL + 'list/' + aoguid + '/all';
-    BldMapper =  BuildingsMapper;
-    return XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
+  func GetSubsAsync(aoguid:String):TUL.AsyncResult;
+    self.BldFetch.Host = rest_URL + 'list/';
+    return BldFetch.Call([aoguid + '/all_b']);
   end;
 
 end
