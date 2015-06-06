@@ -97,7 +97,7 @@ inobject
   proc LAGfromAreas(Areas: Variant);
     var tmpa: Storage[];
     var tmp: Storage;
-    if not Areas = 'Too big list' then
+    if not (varType(Areas) = varString and Areas = 'Too big list') then
       tmpa = Areas as Storage[];
       tmp = tmpa[1];
       SetLastAoGuid(tmp.aoguid);
@@ -489,6 +489,21 @@ inobject
       end;
     end;
     Result = True; -- Разрешаем сохранить изменения в поле
+  end;
+
+  func ПолеДата_ПриПроверке(Cell :TemplateCell; Index :Integer; var Value :Variant) :Logical;
+    Result  = true;
+    if Cell.Contents = 'Дата' then
+       if Value>ДатаОкончания and ДатаОкончания<>nil then
+         Message('Дата начала не может быть позже, чем дата окончания!');
+         Result  = false;
+       end;
+    elsif Cell.Contents = 'ДатаОкончания' then
+      if Дата>Value and Value<>nil and Дата<>nil then
+         Message('Дата начала не может быть позже, чем дата окончания!');
+         Result  = false;
+      end;
+    end;
   end;
 
 --{
