@@ -491,7 +491,7 @@ inobject
     Result = True; -- Разрешаем сохранить изменения в поле
   end;
 
-  func ПолеДата_ПриПроверке(Cell :TemplateCell; Index :Integer; var Value :Variant) :Logical;
+  func ПолеДатаАкт_ПриПроверке(Cell :TemplateCell; Index :Integer; var Value :Variant) :Logical;
     Result  = true;
     if Cell.Contents = 'Дата' then
        if Value>ДатаОкончания and ДатаОкончания<>nil then
