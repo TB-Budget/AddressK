@@ -613,6 +613,14 @@ inobject
             Record.Корпус = Record.Корпус + ' c.' + Record.Дом_С;
          end;
       end;
+    else
+      Record.Дом_Н = Cell.Value;
+      Record.Дом_К = "";
+      Record.Дом_С = "";
+
+    --Поля для совместимости
+      Record.Дом = Cell.Value;
+      Record.Корпус = "";
     end;
   end;
 
