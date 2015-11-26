@@ -110,6 +110,8 @@ func UseFiosm: Logical;
     Select;
     if not (Bof and Eof) then
       Result = not Current.NotUsedFIOSM;
+    else
+      Result =  True;
     end;
   end;
 end;
