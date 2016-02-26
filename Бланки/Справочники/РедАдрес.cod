@@ -30,6 +30,7 @@ inobject
   var секПозицииТиповАдресов: TemplateSection;--новая секция
   var секцДомНовое: TemplateSection;
   var секцДомСтарое: TemplateSection;
+  var секцСубъект: TemplateSection;
 
   proc Поле_СокрПриВыходе(Cell :TemplateCell; Index :Integer);
     -- Обработка события выхода из редактируемого поля
@@ -258,8 +259,10 @@ inobject
     ТипАдресаНаим = nil;
     with Query.Create([Базовый.Справочники.ТипАдреса]) do
       Order = 'Номер';
-      if true in [Субъект.ФизическоеЛицо,Субъект.Сотрудник] then
+      if Субъект.ФизическоеЛицо or Субъект.Сотрудник then
         Filter = 'ДляФизлиц';
+      elsif Субъект.Контрагент and Субъект.ТипКонтрагента = 0 then
+        Filter = 'ДляКонтрагентов';
       fi;
       Select;
       while not Eof do
@@ -268,6 +271,17 @@ inobject
       end;--while not Eof
       секПозицииТиповАдресов.Count = Count;
     end;--with Query
+  end;
+
+  proc УстановитьФильтрСубъекта;
+    var Filter: String;
+    if Субъект.ФизическоеЛицо then
+      Filter = 'ФизическоеЛицо';
+    elsif Субъект.Контрагент then
+      Filter = 'Контрагент';
+    fi;
+    секцСубъект.CellByField["Субъект.Имя"].LookupFilter=Filter;
+    
   end;
 --}
 
@@ -333,6 +347,7 @@ inobject
     end;
     LAGPrefetch = RequestAoGuid;
     LAGPrefetch.then_(TUL.Method.CreateEx(self, 'LAGfromAreas'));
+    УстановитьФильтрСубъекта;
   end;--proc шаблон_ПриСчитывании
 --}
 
