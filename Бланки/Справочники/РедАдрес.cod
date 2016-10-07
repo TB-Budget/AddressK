@@ -309,7 +309,12 @@ inobject
     FileObj.load(SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
     Mapper = Библио.EstStatMapper;
     СтатДомов = Mapper.ParseNode(FileObj.documentElement).EstateStatus as Storage[];
-  end;--proc шаблон_ПриОткрытии
+    with Template.CellByField['Регион_Код'] do
+      Enabled = not Self.UseFiosm;
+      ReadOnly = Self.UseFiosm;
+      OnEnter = if(Self.UseFiosm, '', 'Поле_СтрПриВходе');
+    end;
+  end;
 
 
   proc шаблон_ПриСчитывании;
@@ -444,6 +449,22 @@ inobject
     else
       Result = true;
     end;
+  end;
+
+  func Поле_СтрПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+    var locRecord: Record;
+    if (Cell.Contents = 'Регион_Код') and (Action <> Template.Clear):
+      if CmOk = OpenCardFile('Базовый.Классификаторы.картКладр', locRecord, 'Уровень=1', Window.ModalWindow):
+        Регион_Стр = locRecord.GetField('Имя');
+        Регион_Код = SubStr(locRecord.GetField('Код'), 1, 2);
+        Регион_Элемент = locRecord.GetField('Сокращение');
+        Template.EndEdit;
+      fi;
+    elsif (Cell.Contents = 'Регион_Код') and (Action = Template.Clear):
+      Регион_Стр = nil;
+      Регион_Код = nil;
+      Регион_Элемент = nil;
+    fi;
   end;
 
   func Поле_СтрПриПроверке(Cell: TemplateCell; Index: Integer; var Value: Variant): Logical;
@@ -642,6 +663,23 @@ inobject
   func АвтоАдрес_Общее_ПриНажатии(Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     Адрес_Строкой = Базовый.Справочники.интАдрес.Адрес_Общий(Record);
     Result = True; -- Разрешаем стандартную обработку
+  end;
+
+  proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    var locStyle: TemplateStyle;
+    if (Cell.Contents = 'Регион_Код'):
+      if Cell.Enabled:
+        locStyle = СтильПоИмени('Поле выбора');
+      else
+        locStyle = СтильПоИмени('Поле вывода');
+      fi;
+      Color = locStyle.Color;
+      FieldColor = locStyle.FieldColor;
+      Font.Color = locStyle.Font.Color;
+      if Selected:
+        Color = СИС2.Константы.COLOR_HIGHLIGHT;
+      fi;
+    fi;
   end;
 
 --}
