@@ -134,25 +134,24 @@ func GetFIASObj:DynamicObject;
   if FIOSM_URL = "":
     FIOSM_URL = Константы.FiosmUrl_ByDefault;
   end;
-
   res = ФИАС_XML_RPC.CreateEx(FIOSM_URL + "/xmlrpc");
   res.rest_URL = FIOSM_URL + "/rest/";
   Result = res;
 end;
 
-func EstStatMapper:XMLRPC.XMLMapper;
-    var res: XMLRPC.XMLMapper;
-    var res_: XMLRPC.XMLMapper;
+func EstStatMapper:TUL.XMLMapper;
+    var res: TUL.XMLMapper;
+    var res_: TUL.XMLMapper;
 
-    res = XMLRPC.XMLMapper.Create;
-    res.fields[1] = XMLRPC.MapperNode.Create;
+    res = TUL.XMLMapper.Create;
+    res.fields[1] = TUL.XMLMapperNode.Create;
     res.fields[1].nodename = 'EstateStatus';
     res.fields[1].fieldname = 'EstateStatus';
     res.fields[1].nodekind = 1; --узел
     res.fields[1].repeatable = True;
 
-    res_  = XMLRPC.XMLMapper.Create;
-    res_.fields[1] = XMLRPC.MapperNode.Create;
+    res_  = TUL.XMLMapper.Create;
+    res_.fields[1] = TUL.XMLMapperNode.Create;
     res_.fields[1].nodename = 'ESTSTATID';
     res_.fields[1].fieldname = 'ESTSTATID';
     res_.fields[1].nodekind = 2; --атрибут
@@ -163,7 +162,7 @@ func EstStatMapper:XMLRPC.XMLMapper;
 --    res_.fields[1].nodetype = 2; --varInt
 --    res.fields[1].nodetype.fields[1].nodetype = 2; --varI
 
-    res_.fields[2] = XMLRPC.MapperNode.Create;
+    res_.fields[2] = TUL.XMLMapperNode.Create;
     res_.fields[2].nodename = 'NAME';
     res_.fields[2].fieldname = 'NAME';
     res_.fields[2].nodekind = 2; --атрибут

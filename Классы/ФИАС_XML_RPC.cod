@@ -14,21 +14,21 @@
 --Ограниченного Применения GNU. Если вы его не получили, сообщите об этом в Software Foundation, Inc.,
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-class inherited XMLRPC.XMLRPC_Proxy "";
-import XMLRPC classes XMLMapper, MapperNode;
+class inherited WebTL.XMLRPC_Proxy "";
+import TUL classes XMLMapper, XMLMapperNode;
 inclass
   func BuildingsMapper:XMLMapper;
     var res: XMLMapper;
 
     res = XMLMapper.Create;
-    res.fields[1] = MapperNode.Create;
+    res.fields[1] = XMLMapperNode.Create;
     res.fields[1].nodename = 'sub';
     res.fields[1].fieldname = 'sub';
     res.fields[1].nodekind = 1;
     res.fields[1].repeatable = True;
     res.fields[1].nodetype = XMLMapper.Create;
     res.fields[1].nodetype.allowreflection = True;
-    res.fields[2] = MapperNode.Create;
+    res.fields[2] = XMLMapperNode.Create;
     res.fields[2].nodename = 'too_much';
     res.fields[2].fieldname = 'too_much';
     res.fields[2].nodekind = 1;
@@ -38,17 +38,17 @@ inclass
     return res;
   end;
 
-  WaitingAsync: XMLRPC.HTTPAsync;
+  WaitingAsync: WebTL.HTTPAsync;
   func CreateEx(URL: String): ФИАС_XML_RPC;
     Result = inherited CreateEx(URL);
-    Result.BldFetch = SimpleRestGet.CreateEx('list/', BuildingsMapper);
-    Result.GetAreasFunc = XMLRPC.XMLRPCFunc.CreateEx(URL, "GetAreas", false);
+    Result.BldFetch = WebTL.SimpleRestGet.CreateEx('list/', BuildingsMapper);
+    Result.GetAreasFunc = WebTL.XMLRPCFunc.CreateEx(URL, "GetAreas", false);
   end;
 
 inobject
   var rest_URL:String;
-  var BldFetch: SimpleRestGet;
-  var GetAreasFunc: XMLRPC.XMLRPCFunc;
+  var BldFetch: WebTL.SimpleRestGet;
+  var GetAreasFunc: WebTL.XMLRPCFunc;
 
   func GetBuildingProperties(AO_GUID:String;Proplist:Variant):Storage;
     Result = _Execute_single("GetBuildingProperties", [AO_GUID, Proplist]) as Storage;

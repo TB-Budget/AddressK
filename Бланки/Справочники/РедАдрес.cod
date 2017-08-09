@@ -273,7 +273,7 @@ inobject
 
 --{События шаблона
   proc шаблон_ПриОткрытии(Create :Logical);
-    var Mapper: XMLRPC.XMLMapper;
+    var Mapper: TUL.XMLMapper;
     var FileObj:AutoObject;
     inherited шаблон_ПриОткрытии(Create);
     ТипАдресаНаим = nil;
@@ -399,7 +399,8 @@ inobject
           tmp = tmp.sub;
         end;
         if varType(tmp) = 8 then  --Тут еще может быть строка с ошибкой
-          tmp = XMLRPC.Библио.Filter('aolevel = "'+Str(УровниФИАС[l])+'"', tmp as Object[]);
+          tmp = TUL.FuncTools.Filter(TUL.EvalObject.New('aolevel = "'+Str(УровниФИАС[l])+'"'),
+                                     tmp as Object[]);
         elsif varType(tmp) <> 1:  --А если тут не строка, то похоже пришел какой-то мусор
           tmp = nil;
         end;

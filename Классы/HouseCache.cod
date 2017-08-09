@@ -27,7 +27,7 @@ inclass
 
 inobject
   var cache:Storage;
-  var ФИАС:ФИАС_XML_RPC;
+  var ФИАС:Object;
 
   func gethouses(aoguid:String):String[2];
     var i:Integer;
