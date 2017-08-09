@@ -17,11 +17,13 @@
 class "Кэш домиков";
 import                          Classes Библио;
 inclass
+var selfref:HouseCache;
   func Create:HouseCache;
-    var selfref:HouseCache;
-    selfref = inherited Create;
-    selfref.cache = Storage.Create;
-    selfref.ФИАС = GetFIASObj;
+    if selfref = nil then
+      selfref = inherited Create;
+      selfref.cache = Storage.Create;
+      selfref.ФИАС = GetFIASObj;
+    end;
     Result = selfref;
   end;
 

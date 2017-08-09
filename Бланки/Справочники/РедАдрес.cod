@@ -30,6 +30,7 @@ inobject
   var секПозицииТиповАдресов: TemplateSection;--новая секция
   var секцДомНовое: TemplateSection;
   var секцДомСтарое: TemplateSection;
+  var секцСубъект: TemplateSection;
 
   proc Поле_СокрПриВыходе(Cell :TemplateCell; Index :Integer);
     -- Обработка события выхода из редактируемого поля
@@ -258,8 +259,10 @@ inobject
     ТипАдресаНаим = nil;
     with Query.Create([Базовый.Справочники.ТипАдреса]) do
       Order = 'Номер';
-      if true in [Субъект.ФизическоеЛицо,Субъект.Сотрудник] then
+      if Субъект.ФизическоеЛицо or Субъект.Сотрудник then
         Filter = 'ДляФизлиц';
+      elsif Субъект.Контрагент and Субъект.ТипКонтрагента = 0 then
+        Filter = 'ДляКонтрагентов';
       fi;
       Select;
       while not Eof do
@@ -268,6 +271,17 @@ inobject
       end;--while not Eof
       секПозицииТиповАдресов.Count = Count;
     end;--with Query
+  end;
+
+  proc УстановитьФильтрСубъекта;
+    var Filter: String;
+    if Субъект.ФизическоеЛицо then
+      Filter = 'ФизическоеЛицо';
+    elsif Субъект.Контрагент then
+      Filter = 'Контрагент';
+    fi;
+    секцСубъект.CellByField["Субъект.Имя"].LookupFilter=Filter;
+    
   end;
 --}
 
@@ -295,7 +309,12 @@ inobject
     FileObj.load(SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
     Mapper = Библио.EstStatMapper;
     СтатДомов = Mapper.ParseNode(FileObj.documentElement).EstateStatus as Storage[];
-  end;--proc шаблон_ПриОткрытии
+    with Template.CellByField['Регион_Код'] do
+      Enabled = not Self.UseFiosm;
+      ReadOnly = Self.UseFiosm;
+      OnEnter = if(Self.UseFiosm, '', 'Поле_СтрПриВходе');
+    end;
+  end;
 
 
   proc шаблон_ПриСчитывании;
@@ -333,6 +352,7 @@ inobject
     end;
     LAGPrefetch = RequestAoGuid;
     LAGPrefetch.then_(TUL.Method.CreateEx(self, 'LAGfromAreas'));
+    УстановитьФильтрСубъекта;
   end;--proc шаблон_ПриСчитывании
 --}
 
@@ -430,6 +450,22 @@ inobject
     else
       Result = true;
     end;
+  end;
+
+  func Поле_СтрПриВходе(Cell: TemplateCell; Index: Integer; Action: Template.EnterTypes): Logical;
+    var locRecord: Record;
+    if (Cell.Contents = 'Регион_Код') and (Action <> Template.Clear):
+      if CmOk = OpenCardFile('Базовый.Классификаторы.картКладр', locRecord, 'Уровень=1', Window.ModalWindow):
+        Регион_Стр = locRecord.GetField('Имя');
+        Регион_Код = SubStr(locRecord.GetField('Код'), 1, 2);
+        Регион_Элемент = locRecord.GetField('Сокращение');
+        Template.EndEdit;
+      fi;
+    elsif (Cell.Contents = 'Регион_Код') and (Action = Template.Clear):
+      Регион_Стр = nil;
+      Регион_Код = nil;
+      Регион_Элемент = nil;
+    fi;
   end;
 
   func Поле_СтрПриПроверке(Cell: TemplateCell; Index: Integer; var Value: Variant): Logical;
@@ -628,6 +664,23 @@ inobject
   func АвтоАдрес_Общее_ПриНажатии(Cell: TemplateCell; Action: Template.ClickTypes): Logical;
     Адрес_Строкой = Базовый.Справочники.интАдрес.Адрес_Общий(Record);
     Result = True; -- Разрешаем стандартную обработку
+  end;
+
+  proc Поле_ПриРисовании(Cell: TemplateCell; Selected: Logical; var Color: Integer; var FieldColor: Integer; Font: Font);
+    var locStyle: TemplateStyle;
+    if (Cell.Contents = 'Регион_Код'):
+      if Cell.Enabled:
+        locStyle = СтильПоИмени('Поле выбора');
+      else
+        locStyle = СтильПоИмени('Поле вывода');
+      fi;
+      Color = locStyle.Color;
+      FieldColor = locStyle.FieldColor;
+      Font.Color = locStyle.Font.Color;
+      if Selected:
+        Color = СИС2.Константы.COLOR_HIGHLIGHT;
+      fi;
+    fi;
   end;
 
 --}
