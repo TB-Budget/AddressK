@@ -357,21 +357,22 @@ inobject
 --}
 
 --{События полей шаблона
-  proc Поле_ПриВыходе(Cell :TemplateCell; Index :Integer);
-    var j : integer;
-    if Cell.Value = false then
-      for j = 1..Позиции.Count do
-        if Позиции.Items[j].ТипАдреса = ТипАдресаНаим[Index] then
+
+  proc Поле_ТипАдресаПриВыходе (Cell: TemplateCell; Index: Integer);
+    var j, jj: integer;
+    jj = Позиции.Count;
+    if (Cell.Value = false):
+      for j = 1 .. jj do
+        if (Позиции.Items[j].ТипАдреса = ТипАдресаНаим[Index]):
           Позиции.Delete(j);
           Break;
-        end;
-      end;--for j
+        fi;
+      od;
     else
-      Позиции.Insert(Позиции.Count+1);
-      Позиции.Items[Позиции.Count].ТипАдреса = ТипАдресаНаим[Index];
-    end;--if Cell.Value
-  end;--proc Поле_ПриВыходе
-
+      Позиции.Insert(jj + 1);
+      Позиции.Items[jj].ТипАдреса = ТипАдресаНаим[Index];
+    fi;
+  end;
 
   func Поле_СтрПриОбзоре(Cell: TemplateCell; Value: Variant; var NewValue :Variant) :Logical;
     var filter_by:Storage;

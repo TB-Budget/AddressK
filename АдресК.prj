@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
+ï»¿<?xml version="1.0" encoding="utf-8"?>
 <Project Version="1">
-  <Options Caption="ÀäðåñÊ" Comment="Ðàñøèðåíèå ôóíêöèîíàëà ðàáîòû ñ àäðåñàìè" Version="001" Author="Copyright © 2014 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
+  <Options Caption="ÐÐ´Ñ€ÐµÑÐš" Comment="Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð¸Ðµ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¾Ð½Ð°Ð»Ð° Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ Ñ Ð°Ð´Ñ€ÐµÑÐ°Ð¼Ð¸" Version="001" Author="Copyright Â© 2014 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
   <Usage>
-    <Project Name="Áàçîâûé"/>
+    <Project Name="Ð‘Ð°Ð·Ð¾Ð²Ñ‹Ð¹"/>
     <Project Name="TUL"/>
     <Project Name="WebTL"/>
   </Usage>
   <Groups>
-    <Group Name="Ñïðàâî÷íèêè" Type="Documents" Disabled="False"/>
-    <Group Name="Áëàíêè" Type="Blanks" Disabled="False"/>
-    <Group Name="Êëàññû" Type="Classes" Disabled="False"/>
+    <Group Name="Ð¡Ð¿Ñ€Ð°Ð²Ð¾Ñ‡Ð½Ð¸ÐºÐ¸" Type="Documents" Disabled="False"/>
+    <Group Name="Ð‘Ð»Ð°Ð½ÐºÐ¸" Type="Blanks" Disabled="False"/>
+    <Group Name="ÐšÐ»Ð°ÑÑÑ‹" Type="Classes" Disabled="False"/>
     <Group Name="Shared" Type="Other" Disabled="False"/>
   </Groups>
 </Project>
