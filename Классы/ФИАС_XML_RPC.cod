@@ -16,6 +16,7 @@
 
 class inherited WebTL.XMLRPC_Proxy "";
 import TUL classes XMLMapper, XMLMapperNode;
+import classes Библио;
 inclass
   func BuildingsMapper:XMLMapper;
     var res: XMLMapper;
@@ -95,7 +96,56 @@ inobject
 
   func GetSubsAsync(aoguid:String):TUL.AsyncResult;
     self.BldFetch.Host = rest_URL + 'list/';
+    return BldFetch.Call([aoguid + '/all']);
+  end;
+
+  --Прототип нового API
+  --Все функции потенциально имеют право быть асинхронными, используйте TUL.AsyncTools.Ensure
+  func SubB(aoguid: String): Variant;
+    self.BldFetch.Host = rest_URL + 'list/';
     return BldFetch.Call([aoguid + '/all_b']);
   end;
+
+  func SubO(aoguid: String): Variant;
+    self.BldFetch.Host = rest_URL + 'list/';
+    return BldFetch.Call([aoguid + '/all']);
+  end;
+
+  func BldInfo(aoguid: String; bldguid: String): Variant;
+    --aoguid только для совместимости API, в этой версии не работает
+    Result = _Execute_single("GetBuildingProperties",
+                             [bldguid, ['housenum', 'strucnum', 'buildnum',
+                                        'eststatus', 'postalcode', 'okato']]) as Storage;
+
+  end;
+
+  func SearchAO(filter_by: Storage): Variant;
+  var Name_like: String;
+    if filter_by.FieldExists('name_like') then
+       Name_like = filter_by.GetField('name_like');
+       filter_by.DeleteField('name_like');
+    fi;
+    return GetAreasFunc.Call([filter_by, Name_like]);
+  end;
+
+
+  func AOInfo(aoguid: String): Storage;
+  var filter_by: Storage;
+  var tmp: Variant[];
+  var i: Integer;
+    filter_by = Storage.Create;
+    filter_by.aoguid = aoguid;
+    tmp = TUL.AsyncTools.Ensure(SearchAO(filter_by)) as Variant[];
+    Result = tmp[1];
+    for i = 1 .. LengthOfArray(ПоляФИАС) do
+      if Result.FieldExists(ПоляФИАС[i])  then
+         Result.SetField(ПоляФИАС[i],
+                         _Execute_single("GetAreaProperty", [aoguid, ПоляФИАС[i]]));
+      fi;
+    od;
+    
+  end;
+
+
 
 end
