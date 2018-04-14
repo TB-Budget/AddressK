@@ -369,8 +369,9 @@ inobject
         fi;
       od;
     else
-      Позиции.Insert(jj + 1);
-      Позиции.Items[jj].ТипАдреса = ТипАдресаНаим[Index];
+      j = jj + 1;
+      Позиции.Insert(j);
+      Позиции.Items[j].ТипАдреса = ТипАдресаНаим[Index];
     fi;
   end;
 
