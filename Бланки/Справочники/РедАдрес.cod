@@ -52,22 +52,12 @@ inobject
 
   var ФИАС: DynamicObject;  --Объект доступа к ФИАС. Зависит от выбранного "бэкенда".
   var ao_guid: Variant[];  --Идентификаторы адресных элементов строка-гуид или отложенный результат.
-  var sub_cache: Storage;  --Кэш подчиненных адресных элементов
-             -- поле - гуид строкой; значение - массив хранилищ или AsyncResult
   var last_ao_guid: String;
   var hCache: HouseCache;
-  var СтатДомов: Storage[];  --загружаемая при запуске база статусов домов
-                             --очень маленькая, поэтому не храним в БД
   var LAGPrefetch: TUL.Promise;
 --}
 
 --{Вспомогательные процедуры и функции
-  proc Cache_subs(aoguid:String);
-    if aoguid <> nil and not sub_cache.FieldExist(aoguid) then
-      sub_cache.SetField(aoguid, ФИАС.GetSubsAsync(aoguid));
-    end;
-  end;
-
   func RequestAoGuid: TUL.Promise;
     var n, i, ii: Integer;
     var tmp: Variant;
@@ -85,11 +75,16 @@ inobject
         end;
     end;
     filter_by = СборУсл(n + 1); --А вот это не шибко правильно!
-    return ФИАС.GetAreasAsync(filter_by,);
+    if n = 0 then
+       filter_by.parentid = 0;
+      else
+       filter_by.aolevel = УровниФИАС[n];
+    fi;
+    return ФИАС.SearchAO(filter_by);
   end;
 
   Func LastAoGuid:String;
-    if last_ao_guid = "" then
+    if last_ao_guid = "" and Регион_Стр<>'' then
       LAGfromAreas(RequestAoGuid.Get as Storage[]);
     end;
     return self.last_ao_guid;
@@ -100,8 +95,12 @@ inobject
     var tmp: Storage;
     if not (varType(Areas) = varString and Areas = 'Too big list') then
       tmpa = Areas as Storage[];
-      tmp = tmpa[1];
-      SetLastAoGuid(tmp.aoguid);
+      if LengthOfArray(tmpa) > 0 then
+        tmp = tmpa[1];
+        SetLastAoGuid(tmp.aoguid);
+      else
+        SetLastAoGuid('');
+      fi;
     end;
   end;
 
@@ -119,27 +118,13 @@ inobject
   Func SaveLevel(AO:Storage):String;
      var prefix:String;
      var l:Integer;
-     var filter_by:Storage;
-     var AO_:variant[];
-     --AO.aolevel = Int(AO.aolevel); --!Фикс для строковой загрузки из REST
+     var tmp: Variant;
      --проверяем - если получено из REST-списка, надо получить объект заново.
-     if AO.FieldExist('guid') and not AO.FieldExist('aoguid') then
-        --AO.aoguid = AO.guid;
-        filter_by = Storage.Create;
-        filter_by.aoguid = AO.guid;
-        AO_ = ФИАС.GetAreas(filter_by,) as variant[];
-        AO = AO_[1];
+     if AO.FieldExist('guid'):
+        AO = ФИАС.AOInfo(AO.guid);
+     else
+        AO = ФИАС.AOInfo(AO.aoguid);
      end;
-     --Подгрузка потенциально пропущенных полей
---     if not AO.FieldExist('formalname') then
---        AO.formalname = ФИАС.GetAreaProperty(AO.aoguid, 'formalname');
---     end;
---     if not AO.FieldExist('shortname') then
---        AO.shortname = ФИАС.GetAreaProperty(AO.aoguid, 'shortname');
---     end;
---     if not AO.FieldExist('fullname') then
---        AO.fullname = ФИАС.GetAreaProperty(AO.aoguid, 'fullname');
---     end;
      l = SearchInArray(УровниФИАС, AO.aolevel);
      prefix = ПрефПолей[l];
      if l <> 1 then
@@ -148,9 +133,9 @@ inobject
        Record.SetField(prefix + "_Стр", AO.formalname);
      end;
      result = AO.formalname;
-     Record.SetField(prefix + "_Код", ФИАС.GetAreaProperty(AO.aoguid, ПоляФИАС[l]));
+     Record.SetField(prefix + "_Код", AO.GetField(ПоляФИАС[l]));
      ao_guid[l] = AO.aoguid;
-     Cache_subs(AO.aoguid);
+     tmp = ФИАС.SubO(AO.aoguid); --это для кэширования
      if УровниКЛАДР[l] = -1 then
         Record.SetField(prefix + "_Сокр", AO.shortname);
         Record.SetField(prefix + "_Стат", AO.fullname);
@@ -287,8 +272,6 @@ inobject
 
 --{События шаблона
   proc шаблон_ПриОткрытии(Create :Logical);
-    var Mapper: TUL.XMLMapper;
-    var FileObj:AutoObject;
     inherited шаблон_ПриОткрытии(Create);
     ТипАдресаНаим = nil;
     ТипАдресаПрименен = nil;
@@ -300,15 +283,6 @@ inobject
     end;
     ФИАС = GetFIASObj;
     hCache = HouseCache.Create;
-    sub_cache = Storage.Create;
-    Cache_subs('None');  -- Всегда кешируем 'корень'
-    --Загрузка справочника статусов домов
-    FileObj = AutoObject.Create("Msxml2.DOMDocument.6.0");
-    СИС2.Файл.СинхронизироватьФайлы(BaseInfo.ProjectByName["АдресК"].Folder + "\\Shared\\AS_ESTSTAT.XML",
-                                    SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
-    FileObj.load(SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
-    Mapper = Библио.EstStatMapper;
-    СтатДомов = Mapper.ParseNode(FileObj.documentElement).EstateStatus as Storage[];
     with Template.CellByField['Регион_Код'] do
       Enabled = not Self.UseFiosm;
       ReadOnly = Self.UseFiosm;
@@ -336,15 +310,13 @@ inobject
     for k = 1..j do
       tmpSt = СборУсл(k + 1);
       tmpSt.aolevel = УровниФИАС[k];
-      ao_guid[k] = ФИАС.GetAreasAsync(tmpSt, '');
+      ao_guid[k] = ФИАС.SearchAO(tmpSt);
       if k>1 and ao_guid[k] = ao_guid[k-1] then
         ao_guid[k].abort;
         ao_guid[k] = nil;
       else
         --Добавляем постобработку чтобы получать ГУИД из списка
         ao_guid[k].postprocess = TUL.ClassMeth.CreateExS("АдресК.Библио.AGfromAreas");
-        --И подвешиваем автоматическое кэширование подчиненных
-        ao_guid[k].AutoPoll(TUL.Method.CreateEx(self, 'Cache_subs'));
       fi;
     end;
     if LAGPrefetch <> nil then
@@ -395,30 +367,20 @@ inobject
           Break;
         fi;
       end;
-      if tmpGuid = '' then
-        tmpGuid = 'None';
-      end;
-      --Если есть закэшированный список - выведем его
-      if tmpGuid <> nil and sub_cache.FieldExists(tmpGuid):
-        if sub_cache.GetField(tmpGuid) is TUL.AsyncResult then
-          if sub_cache.GetField(tmpGuid).ready then
-            tmp = sub_cache.GetField(tmpGuid).Get;
-            --Ну и сохраним заодно чтобы не парсить заново
-            sub_cache.SetField(tmpGuid, tmp);
-          end;
-        else  --уже распарсен
-          tmp = sub_cache.GetField(tmpGuid);
-        end;
+      if l = 1 then
+         tmpGuid = 'None';
+      fi;
+      --Если есть ГУИД - запрашиваем детей
+      if tmpGuid <> nil:
+        tmp = TUL.AsyncTools.Ensure(ФИАС.SubO(tmpGuid));
         --Доппроверка too_much
-        if tmp is Storage and tmp.FieldExist('too_much') then
-          if tmp.too_much then
-            tmp = 'Слишком много элементов, уточните запрос';
-          end;
+        if tmp is Storage and tmp.FieldExist('too_much') and tmp.too_much then
+          tmp = '';
         end;
         --Вытаскивание массива
         if tmp is Storage and tmp.FieldExist('sub') then
           tmp = tmp.sub;
-        end;
+        fi;
         if varType(tmp) = 8 then  --Тут еще может быть строка с ошибкой
           tmp = TUL.FuncTools.Filter(TUL.EvalObject.New('aolevel = "'+Str(УровниФИАС[l])+'"'),
                                      tmp as Object[]);
@@ -430,7 +392,7 @@ inobject
         --Если с кэшем не срослось - запрашиваем из базы
         filter_by = СборУсл(l);
         filter_by.aolevel = УровниФИАС[l];
-        tmp = ФИАС.GetAreas(filter_by,);
+        tmp = TUL.AsyncTools.Ensure(ФИАС.SearchAO(filter_by));
       end;
       if VarType(tmp) = varString  then
         Message(tmp);
@@ -486,7 +448,8 @@ inobject
       end;
       filter_by = СборУсл(l);
       filter_by.aolevel = УровниФИАС[l];
-      tmp = ФИАС.GetAreas(filter_by,'%'+Value+'%');--SimpleCall("http://127.0.0.1:8080/","GetAreas",[filter_by])[1];
+      filter_by.name_like = '%'+Value+'%';
+      tmp = TUL.AsyncTools.Ensure(ФИАС.SearchAO(filter_by));
       if VarType(tmp) = varString  then
         Message(tmp);
         return False;
@@ -619,28 +582,20 @@ inobject
   end;
 
   proc ПолеДом_стрПриВыходе(Cell :TemplateCell; Index :Integer);
-    var reqpar:String[];
     var tmp:Storage;
     var pairs:String[2];
-    var i, j:Integer;
-    reqpar = ['housenum', 'strucnum', 'buildnum', 'eststatus'];
-    InsertInArray(reqpar, 1, 'postalcode');
-    InsertInArray(reqpar, 1, 'okato');
+    var i:Integer;
     pairs = hCache.gethouses(LastAoGuid);
     i = SearchInArray(pairs[1], Cell.Value);
     if i>0 then
-      tmp = ФИАС.GetBuildingProperties(pairs[2, i], reqpar);
+      tmp = ФИАС.BldInfo('', pairs[2, i]);
       Record.Дом_Н = tmp.housenum;
       Record.Дом_К = tmp.buildnum;
       Record.Дом_С = tmp.strucnum;
       Record.Индекс = tmp.postalcode;
       Record.ОКАТО = tmp.okato;
       --тип дома
-      for j = 1 .. LengthOfArray(СтатДомов) do
-        if СтатДомов[j].ESTSTATID = Int(tmp.eststatus) then
-           Дом_Элемент = ЭлементСтат(СтатДомов[j].NAME,СтатДомов[j].NAME,6);
-        end;
-      end;
+      Дом_Элемент = ЭлементСтат(tmp.txteststatus, tmp.txteststatus, 6);
       --Поля для совместимости
       Record.Корпус = Record.Дом_К;
       Record.Дом = Record.Дом_Н;

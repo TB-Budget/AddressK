@@ -41,20 +41,29 @@ inclass
 
   WaitingAsync: WebTL.HTTPAsync;
   func CreateEx(URL: String): ФИАС_XML_RPC;
+    var Mapper: TUL.XMLMapper;
+    var FileObj:AutoObject;
+
     Result = inherited CreateEx(URL);
     Result.BldFetch = WebTL.SimpleRestGet.CreateEx('list/', BuildingsMapper);
     Result.GetAreasFunc = WebTL.XMLRPCFunc.CreateEx(URL, "GetAreas", false);
+    --Загрузка справочника статусов домов
+    FileObj = AutoObject.Create("Msxml2.DOMDocument.6.0");
+    СИС2.Файл.СинхронизироватьФайлы(BaseInfo.ProjectByName["АдресК"].Folder + "\\Shared\\AS_ESTSTAT.XML",
+                                    SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
+    FileObj.load(SessionInfo.LocalFolder + "\\AS_ESTSTAT.XML");
+    Mapper = Библио.EstStatMapper;
+    Result.СтатДомов = Mapper.ParseNode(FileObj.documentElement).EstateStatus as Storage[];
+    Result.SubCache = Storage.Create;
   end;
 
 inobject
   var rest_URL:String;
   var BldFetch: WebTL.SimpleRestGet;
   var GetAreasFunc: WebTL.XMLRPCFunc;
-
-  func GetBuildingProperties(AO_GUID:String;Proplist:Variant):Storage;
-    Result = _Execute_single("GetBuildingProperties", [AO_GUID, Proplist]) as Storage;
-  end;
-
+  var СтатДомов: Storage[];  --загружаемая при запуске база статусов домов
+                             --очень маленькая, поэтому не храним в БД
+  var SubCache: Storage;
 
   proc PollBuildings(AO_GUID:String);
     var tgt_url:String;
@@ -74,29 +83,11 @@ inobject
   end;
 
   func GetBuildings(AO_GUID:String):Storage[];
+    if AO_GUID='' then
+      return [];
+    fi;
     PollBuildings(AO_GUID);
     Result = WaitingAsync.Get.sub as Storage[];
-  end;
-
---  func GetBuildings(AO_GUID:String):Storage[];
---    Result = _Execute_single("GetBuildings", [AO_GUID]) as Storage[];
---  end;
-
-  func GetAreaProperty(AO_GUID:String; Propname:String):Variant;
-    Result = _Execute_single("GetAreaProperty", [AO_GUID, Propname]);
-  end;
-
-  func GetAreas(filter_by:Storage; Name_like:String=''):Variant;
-    Result = _Execute_single("GetAreas", [filter_by, Name_like]);
-  end;
-
-  func GetAreasAsync(filter_by:Storage; Name_like:String=''):TUL.AsyncResult;
-    return GetAreasFunc.Call([filter_by, Name_like]);
-  end;
-
-  func GetSubsAsync(aoguid:String):TUL.AsyncResult;
-    self.BldFetch.Host = rest_URL + 'list/';
-    return BldFetch.Call([aoguid + '/all']);
   end;
 
   --Прототип нового API
@@ -107,15 +98,32 @@ inobject
   end;
 
   func SubO(aoguid: String): Variant;
-    self.BldFetch.Host = rest_URL + 'list/';
-    return BldFetch.Call([aoguid + '/all']);
+    if not SubCache.FieldExists(aoguid) then
+      self.BldFetch.Host = rest_URL + 'list/';
+      SubCache.SetField(aoguid, BldFetch.Call([aoguid + '/all']));
+    fi;
+    Result = SubCache.GetField(aoguid);
+    if SubCache.Count > 100 then
+       SubCache.DeleteAllFields;
+    fi;
+
   end;
 
   func BldInfo(aoguid: String; bldguid: String): Variant;
+    var j: Integer;
+    var par: Variant[];
     --aoguid только для совместимости API, в этой версии не работает
-    Result = _Execute_single("GetBuildingProperties",
-                             [bldguid, ['housenum', 'strucnum', 'buildnum',
-                                        'eststatus', 'postalcode', 'okato']]) as Storage;
+    par[1] = bldguid;
+    par[2] = ['housenum', 'strucnum', 'buildnum', 'eststatus',
+              'postalcode', 'okato'];
+    Result = _Execute_single("GetBuildingProperties", par) as Storage;
+    --тип дома текстовый
+    for j = 1 .. LengthOfArray(СтатДомов) do
+        if СтатДомов[j].ESTSTATID = Int(Result.eststatus) then
+           Result.SetField('txteststatus', СтатДомов[j].NAME);
+        end;
+    end;
+
 
   end;
 
@@ -138,7 +146,7 @@ inobject
     tmp = TUL.AsyncTools.Ensure(SearchAO(filter_by)) as Variant[];
     Result = tmp[1];
     for i = 1 .. LengthOfArray(ПоляФИАС) do
-      if Result.FieldExists(ПоляФИАС[i])  then
+      if not Result.FieldExists(ПоляФИАС[i])  then
          Result.SetField(ПоляФИАС[i],
                          _Execute_single("GetAreaProperty", [aoguid, ПоляФИАС[i]]));
       fi;
