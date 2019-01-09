@@ -17,7 +17,12 @@
 class "Profile";
 
 inclass
-  proc Init;
 
+  proc Init;
   end;
+
+  proc GetSessionInfo;
+    AddSessionInfo(СИС2.Константы.ЗаголовокИнформацииОРелизах, 'Версия проекта '+ClassProject+' : '+Str(Константы.ПолучитьВерсиюПроекта, '0.000'));
+  end;
+
 end
