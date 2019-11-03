@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Project Version="1">
-  <Options Caption="АдресК" Comment="Расширение функционала работы с адресами #52" Version="002" Author="Copyright © 2014-2019 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
+  <Options Caption="АдресК" Comment="Расширение функционала работы с адресами #54" Version="002" Author="Copyright © 2014-2019 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
   <Usage>
     <Project Name="Базовый"/>
     <Project Name="TUL"/>
@@ -8,8 +8,10 @@
   </Usage>
   <Groups>
     <Group Name="Справочники" Type="Documents" Disabled="False"/>
+    <Group Name="Картотеки" Type="Cards" Disabled="False"/>
     <Group Name="Бланки" Type="Blanks" Disabled="False"/>
     <Group Name="Классы" Type="Classes" Disabled="False"/>
     <Group Name="Shared" Type="Other" Disabled="False"/>
+    <Group Name="Помощь" Type="Helps" Disabled="False"/>
   </Groups>
 </Project>

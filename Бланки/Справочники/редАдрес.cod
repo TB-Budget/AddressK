@@ -403,13 +403,15 @@ inobject private
   proc LAGfromAreas (Areas: Variant);
     var tmpa: Storage[];
     var tmp: Storage;
-    if (not (varType(Areas) = varString) and (Areas = 'Too big list')):
-      tmpa = Areas as Storage[];
-      if (LengthOfArray(tmpa) > 0):
-        tmp = tmpa[1];
-        SetLastAoGuid(tmp.aoguid);
-      else
-        SetLastAoGuid('');
+    if not (varType(Areas) = varString and Areas = 'Too big list'):
+      if (Areas is Storage[]):
+        tmpa = Areas as Storage[];
+        if (LengthOfArray(tmpa) > 0):
+          tmp = tmpa[1];
+          SetLastAoGuid(tmp.aoguid);
+        else
+          SetLastAoGuid('');
+        fi;
       fi;
     fi;
   end;
