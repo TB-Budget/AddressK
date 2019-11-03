@@ -16,7 +16,7 @@
 
 class "Profile";
 
-inclass
+inclass public
 
   proc Init;
   end;

@@ -15,141 +15,141 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 class "Библиотечные константы и функции";
-inclass
---Псевдодвумерый массив сопоставления уровней деления.
-var УровниФИАС[] :Integer =     [1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7,
-                                90,
-                                91];
 
-var ПрефПолей[] :String =       ['Регион',
-                                'Округ',
-                                'Район',
-                                'Город',
-                                'Терр',
-                                'НасПункт',
-                                'Улица',
-                                'ДопТерр',
-                                'ДопАЭ'];
+inclass public
 
-var УровниКЛАДР[] :Integer =   [1,
-                                -1,
-                                2,
-                                3,
-                                -1,
-                                4,
-                                5,
-                                -1,
-                                -1];
+  --Псевдодвумерый массив сопоставления уровней деления.
+  var УровниФИАС[] :Integer =     [1,
+                                  2,
+                                  3,
+                                  4,
+                                  5,
+                                  6,
+                                  7,
+                                  90,
+                                  91];
 
-var ПоляФИАС[] :String =       ['regioncode',
-                                'autocode',
-                                'areacode',
-                                'citycode',
-                                'ctarcode',
-                                'placecode',
-                                'streetcode',
-                                'extrcode',
-                                'sextcode'];
+  var ПрефПолей[] :String =       ['Регион',
+                                  'Округ',
+                                  'Район',
+                                  'Город',
+                                  'Терр',
+                                  'НасПункт',
+                                  'Улица',
+                                  'ДопТерр',
+                                  'ДопАЭ'];
 
-var РазмерКода[] :Integer =     [2,
-                                1,
-                                3,
-                                3,
-                                3,
-                                3,
-                                4,
-                                5,
-                                3];
+  var УровниКЛАДР[] :Integer =   [1,
+                                  -1,
+                                  2,
+                                  3,
+                                  -1,
+                                  4,
+                                  5,
+                                  -1,
+                                  -1];
 
--- @doc Проверяет и исправляет либо создаёт новую запись сокращения для адресного элемента
--- @doc Уровни измеряются в соответствии со справочником сокращений (УровниКЛАДР)
-func ЭлементСтат(Сокр:String; Полн:String; Уровень:Integer):Базовый.Классификаторы.Сокращение;
-var Q: Query;
-var res: Базовый.Классификаторы.Сокращение;
-  Q = Query.Create([Базовый.Классификаторы.Сокращение]);
-  Q.Filter = "(Уровень = " + Str(Уровень) + ") AND ( Код ='" + Сокр + "')" ;
-  Q.Select;
-  if Q.Count = 0 then
-     res = Базовый.Классификаторы.Сокращение.Create;
-     res.Уровень = Уровень;
-     res.Код = Substr(Сокр, 1, 10);
-     res.Имя = Полн;
-     res.Post;
-  else
-     Q.First;
-     res = Q.Current;
-     if res.Имя <> Полн then
-        res.Имя = Полн;
-     end;
-  end;
-  Result = res;
-end;
+  var ПоляФИАС[] :String =       ['regioncode',
+                                  'autocode',
+                                  'areacode',
+                                  'citycode',
+                                  'ctarcode',
+                                  'placecode',
+                                  'streetcode',
+                                  'extrcode',
+                                  'sextcode'];
 
-func FilterObjArray(Input:Object[]; Condition:String):Object[];
-  var res:Object[];
-  var i, ii: Integer;
-  res = [];
-  ii = LengthOfArray(Input);
-  for i = 1.. ii do
-    if Input[i].Evaluate(Condition) then
-       СИС2.Функции.AddInArray(res, Input[i]);
-    end;
+  var РазмерКода[] :Integer =     [2,
+                                  1,
+                                  3,
+                                  3,
+                                  3,
+                                  3,
+                                  4,
+                                  5,
+                                  3];
 
-  end;
-  return res;
-end;
-
-func UseFiosm: Logical;
-  with Query.Create([МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса]) do
-    Select;
-    if not (Bof and Eof) then
-      Result = not Current.NotUsedFIOSM;
-    else
-      Result =  True;
-    end;
-  end;
-end;
-
-func GetFIASObj:DynamicObject;
+  -- @doc Проверяет и исправляет либо создаёт новую запись сокращения для адресного элемента
+  -- @doc Уровни измеряются в соответствии со справочником сокращений (УровниКЛАДР)
+  func ЭлементСтат (Сокр: String; Полн: String; Уровень: Integer): Базовый.Классификаторы.Сокращение;
   var Q: Query;
-  var r: МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса;
-  var FIOSM_URL: String;
-  var res: DynamicObject;
-
-  Q = Query.Create([МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса]);
-  Q.Select;
-  if Q.Bof and Q.Eof then  --ТББ_Базовый.Запрос_Пустой
-    FIOSM_URL = "";
-  else
-    r = Q.Current as МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса;
-    FIOSM_URL = r.FIOSM_URL;
+  var res: Базовый.Классификаторы.Сокращение;
+    Q = Query.Create([Базовый.Классификаторы.Сокращение]);
+    Q.Filter = "(Уровень = " + Str(Уровень) + ") AND ( Код ='" + Сокр + "')" ;
+    Q.Select;
+    if (Q.Count = 0):
+      res = Базовый.Классификаторы.Сокращение.Create;
+      res.Уровень = Уровень;
+      res.Код = Substr(Сокр, 1, 10);
+      res.Имя = Полн;
+      res.Post;
+    else
+      Q.First;
+      res = Q.Current;
+      if (res.Имя <> Полн):
+        res.Имя = Полн;
+      fi;
+    fi;
+    Result = res;
   end;
-  Q.Close;
-  if FIOSM_URL = "":
-    FIOSM_URL = Константы.FiosmUrl_ByDefault;
-  end;
-  res = ФИАС_XML_RPC.CreateEx(FIOSM_URL + "/xmlrpc");
-  res.rest_URL = FIOSM_URL + "/rest/";
-  Result = res;
-end;
 
-func EstStatMapper:TUL.XMLMapper;
+  func FilterObjArray (Input: Object[]; Condition: String): Object[];
+    var res: Object[];
+    var i, ii: Integer;
+    res = [];
+    ii = LengthOfArray(Input);
+    for i = 1 .. ii do
+      if Input[i].Evaluate(Condition) then
+         СИС2.Функции.AddInArray(res, Input[i]);
+      fi;
+    od;
+    return res;
+  end;
+
+  func UseFiosm: Logical;
+    with Query.Create([МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса]) do
+      Select;
+      if not (Bof and Eof):
+        Result = not Current.NotUsedFIOSM;
+      else
+        Result = true;
+      fi;
+    end;
+  end;
+
+  func GetFIASObj: DynamicObject;
+    var Q: Query;
+    var r: МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса;
+    var FIOSM_URL: String;
+    var res: DynamicObject;
+    Q = Query.Create([МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса]);
+    Q.Select;
+    if (Q.Bof and Q.Eof):
+      FIOSM_URL = "";
+    else
+      r = Q.Current as МашинаРеквизитов.Настройки.ПараметрыСтруктурыБизнеса;
+      FIOSM_URL = r.FIOSM_URL;
+    fi;
+    Q.Close;
+    if FIOSM_URL = "":
+      FIOSM_URL = Константы.FiosmUrl_ByDefault;
+    fi;
+    res = ФИАС_XML_RPC.CreateEx(FIOSM_URL + "/xmlrpc");
+    res.rest_URL = FIOSM_URL + "/rest/";
+    Result = res;
+  end;
+
+  func EstStatMapper: TUL.XMLMapper;
     var res: TUL.XMLMapper;
     var res_: TUL.XMLMapper;
-
+    --
     res = TUL.XMLMapper.Create;
     res.fields[1] = TUL.XMLMapperNode.Create;
     res.fields[1].nodename = 'EstateStatus';
     res.fields[1].fieldname = 'EstateStatus';
     res.fields[1].nodekind = 1; --узел
     res.fields[1].repeatable = True;
-
+    --
     res_  = TUL.XMLMapper.Create;
     res_.fields[1] = TUL.XMLMapperNode.Create;
     res_.fields[1].nodename = 'ESTSTATID';
@@ -159,8 +159,8 @@ func EstStatMapper:TUL.XMLMapper;
     res_.fields[1].nodetype = 2; --varInt
     res.fields[1].nodetype  = res_;
     --ВАУ!!!
---    res_.fields[1].nodetype = 2; --varInt
---    res.fields[1].nodetype.fields[1].nodetype = 2; --varI
+  --  res_.fields[1].nodetype = 2; --varInt
+  --  res.fields[1].nodetype.fields[1].nodetype = 2; --varI
 
     res_.fields[2] = TUL.XMLMapperNode.Create;
     res_.fields[2].nodename = 'NAME';
@@ -169,20 +169,20 @@ func EstStatMapper:TUL.XMLMapper;
     res_.fields[2].repeatable = False;
     res_.fields[2].nodetype = 1; --varString
     res_.allowreflection = False;
-
+    --
     return res;
-end;
-
-
-func AGfromAreas(Areas:Variant):String;
-  var tmpa: Storage[];
-  var tmp: Storage;
-  tmpa = Areas as Storage[];
-  if LengthOfArray(tmpa) = 0 then
-     return nil;
   end;
-  tmp = tmpa[1];
-  return tmp.aoguid;
-end;
+
+
+  func AGfromAreas (Areas: Variant): String;
+    var tmpa: Storage[];
+    var tmp: Storage;
+    tmpa = Areas as Storage[];
+    if (LengthOfArray(tmpa) = 0):
+      return nil;
+    fi;
+    tmp = tmpa[1];
+    return tmp.aoguid;
+  end;
 
 end
