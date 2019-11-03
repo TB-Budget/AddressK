@@ -15,12 +15,14 @@
 --59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 class inherited WebTL.XMLRPC_Proxy "";
-import TUL classes XMLMapper, XMLMapperNode;
-import classes Библио;
-inclass
-  func BuildingsMapper:XMLMapper;
-    var res: XMLMapper;
 
+  import TUL classes XMLMapper, XMLMapperNode;
+  import classes Библио;
+
+  inclass public
+
+  func BuildingsMapper: XMLMapper;
+    var res: XMLMapper;
     res = XMLMapper.Create;
     res.fields[1] = XMLMapperNode.Create;
     res.fields[1].nodename = 'sub';
@@ -35,15 +37,14 @@ inclass
     res.fields[2].nodekind = 1;
     res.fields[2].nodetype = 4; --varLogical : Integer = 4;  -- Логическое (булево) значение
     res.fields[2].repeatable = False;
-
     return res;
   end;
 
   WaitingAsync: WebTL.HTTPAsync;
-  func CreateEx(URL: String): ФИАС_XML_RPC;
-    var Mapper: TUL.XMLMapper;
-    var FileObj:AutoObject;
 
+  func CreateEx (URL: String): ФИАС_XML_RPC;
+    var Mapper: TUL.XMLMapper;
+    var FileObj: AutoObject;
     Result = inherited CreateEx(URL);
     Result.BldFetch = WebTL.SimpleRestGet.CreateEx('list/', BuildingsMapper);
     Result.GetAreasFunc = WebTL.XMLRPCFunc.CreateEx(URL, "GetAreas", false);
@@ -57,7 +58,8 @@ inclass
     Result.SubCache = Storage.Create;
   end;
 
-inobject
+inobject public
+
   var rest_URL:String;
   var BldFetch: WebTL.SimpleRestGet;
   var GetAreasFunc: WebTL.XMLRPCFunc;
@@ -65,16 +67,16 @@ inobject
                              --очень маленькая, поэтому не храним в БД
   var SubCache: Storage;
 
-  proc PollBuildings(AO_GUID:String);
-    var tgt_url:String;
+  proc PollBuildings (AO_GUID: String);
+    var tgt_url: String;
     tgt_url = rest_URL + 'list/' + AO_GUID + '/all_b';
     if WaitingAsync <> nil then --Сброс "чужого" запроса
-       if WaitingAsync.id <> tgt_url then
-          WaitingAsync.abort;
-          WaitingAsync = nil;
-       end;
-    end;
-    if WaitingAsync = nil then --если запрос есть, значит от "наш"
+      if (WaitingAsync.id <> tgt_url):
+        WaitingAsync.abort;
+        WaitingAsync = nil;
+      fi;
+    fi;
+    if (WaitingAsync = nil): --если запрос есть, значит от "наш"
       --BldMapper =  BuildingsMapper;
       --WaitingAsync = XMLRPC.AsyncResult.RestAsync(tgt_url, BldMapper);--, "GET");--, nil, '');
       self.BldFetch.Host = rest_URL + 'list/';
@@ -82,8 +84,8 @@ inobject
     fi;
   end;
 
-  func GetBuildings(AO_GUID:String):Storage[];
-    if AO_GUID='' then
+  func GetBuildings (AO_GUID: String): Storage[];
+    if (AO_GUID=''):
       return [];
     fi;
     PollBuildings(AO_GUID);
@@ -92,53 +94,51 @@ inobject
 
   --Прототип нового API
   --Все функции потенциально имеют право быть асинхронными, используйте TUL.AsyncTools.Ensure
-  func SubB(aoguid: String): Variant;
+  func SubB (aoguid: String): Variant;
     self.BldFetch.Host = rest_URL + 'list/';
     return BldFetch.Call([aoguid + '/all_b']);
   end;
 
-  func SubO(aoguid: String): Variant;
-    if not SubCache.FieldExists(aoguid) then
+  func SubO (aoguid: String): Variant;
+    if not SubCache.FieldExists(aoguid):
       self.BldFetch.Host = rest_URL + 'list/';
       SubCache.SetField(aoguid, BldFetch.Call([aoguid + '/all']));
     fi;
     Result = SubCache.GetField(aoguid);
     if SubCache.Count > 100 then
-       SubCache.DeleteAllFields;
+      SubCache.DeleteAllFields;
     fi;
-
   end;
 
-  func BldInfo(aoguid: String; bldguid: String): Variant;
+  func BldInfo (aoguid: String; bldguid: String): Variant;
     var j: Integer;
     var par: Variant[];
     --aoguid только для совместимости API, в этой версии не работает
     par[1] = bldguid;
-    par[2] = ['housenum', 'strucnum', 'buildnum', 'eststatus',
-              'postalcode', 'okato'];
+    par[2] = ['housenum', 'strucnum', 'buildnum', 'eststatus', 'postalcode', 'okato'];
     Result = _Execute_single("GetBuildingProperties", par) as Storage;
     --тип дома текстовый
     for j = 1 .. LengthOfArray(СтатДомов) do
-        if СтатДомов[j].ESTSTATID = Int(Result.eststatus) then
-           Result.SetField('txteststatus', СтатДомов[j].NAME);
-        end;
-    end;
-
-
+      if not (Result.eststatus in ['', nil, 'nil']):
+        if СтатДомов[j].ESTSTATID = Int(Result.eststatus):
+          Result.SetField('txteststatus', СтатДомов[j].NAME);
+        fi;
+      fi;
+    od;
   end;
 
-  func SearchAO(filter_by: Storage): Variant;
-  var Name_like: String;
-  var filter_1: Storage;
-  var i: Integer;
+  func SearchAO (filter_by: Storage): Variant;
+    var Name_like: String;
+    var filter_1: Storage;
+    var i: Integer;
     Name_like = '';
     filter_1 = Storage.Create;
     for i = 1..filter_by.Count do
       if filter_by.IndexByNumber[i] = "name_like" then
-         Name_like = filter_by.ItemsByNumber[i];
+        Name_like = filter_by.ItemsByNumber[i];
       else
-         filter_1.SetField(filter_by.IndexByNumber[i], filter_by.ItemsByNumber[i]);
-      end;
+        filter_1.SetField(filter_by.IndexByNumber[i], filter_by.ItemsByNumber[i]);
+      fi;
     od;
 --    if filter_by.FieldExists('name_like') then
 --       Name_like = filter_by.GetField('name_like');
@@ -148,23 +148,19 @@ inobject
   end;
 
 
-  func AOInfo(aoguid: String): Storage;
-  var filter_by: Storage;
-  var tmp: Variant[];
-  var i: Integer;
+  func AOInfo (aoguid: String): Storage;
+    var filter_by: Storage;
+    var tmp: Variant[];
+    var i: Integer;
     filter_by = Storage.Create;
     filter_by.aoguid = aoguid;
     tmp = TUL.AsyncTools.Ensure(SearchAO(filter_by)) as Variant[];
     Result = tmp[1];
     for i = 1 .. LengthOfArray(ПоляФИАС) do
-      if not Result.FieldExists(ПоляФИАС[i])  then
-         Result.SetField(ПоляФИАС[i],
-                         _Execute_single("GetAreaProperty", [aoguid, ПоляФИАС[i]]));
+      if not Result.FieldExists(ПоляФИАС[i]):
+         Result.SetField(ПоляФИАС[i], _Execute_single("GetAreaProperty", [aoguid, ПоляФИАС[i]]));
       fi;
     od;
-    
   end;
-
-
 
 end
