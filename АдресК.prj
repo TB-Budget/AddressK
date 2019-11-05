@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <Project Version="1">
-  <Options Caption="АдресК" Comment="Расширение функционала работы с адресами #54" Version="002" Author="Copyright © 2014-2019 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
+  <Options Caption="АдресК" Comment="Расширение функционала работы с адресами #55" Version="002" Author="Copyright © 2014-2019 Scondo" Code="0" SubCode="0" WebCode="0" WebSubCode="0" Frontal="False"/>
   <Usage>
     <Project Name="Базовый"/>
     <Project Name="TUL"/>
