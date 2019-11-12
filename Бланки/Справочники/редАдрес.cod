@@ -395,7 +395,7 @@ inobject private
 
   func LastAoGuid: String;
     if (last_ao_guid = "") and (Регион_Стр<>''):
-      LAGfromAreas(RequestAoGuid.Get as Storage[]);
+      LAGfromAreas(RequestAoGuid.Get_ as Storage[]);
     fi;
     return self.last_ao_guid;
   end;
