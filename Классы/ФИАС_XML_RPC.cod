@@ -89,7 +89,7 @@ inobject public
       return [];
     fi;
     PollBuildings(AO_GUID);
-    Result = WaitingAsync.Get.sub as Storage[];
+    Result = WaitingAsync.Get_.sub as Storage[];
   end;
 
   --Прототип нового API
